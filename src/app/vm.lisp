@@ -1,8 +1,8 @@
 ;; Define the main package
-(defpackage :my-hello-project.main
+(defpackage :compilation-project-vm.main
   (:use :cl :hello-module)) ;; Import the hello-module package
 
-(in-package :my-hello-project.main)
+(in-package :compilation-project-vm.main)
 
 ;; Entry point function
 (defun main ()
