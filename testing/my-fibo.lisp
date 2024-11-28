@@ -1,14 +1,9 @@
 (defun fibo (n)
-    (if (< n 0)
-        (error "Not a positive int")
+    (cond 
+        (< n 0)(error "Not a positive int")
+        (= n 0) n
+        (= n 1) n
+        (t) (fibo (n-2))+ (fibo (n-1))
     )
-    (when (= n 0)
-      n
-    )
-    (when (= n 1) 
-        n
-    )
-
-    ((fibo (n-2))+ (fibo (n-1)))
 
 )
