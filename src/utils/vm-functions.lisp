@@ -25,12 +25,17 @@
     "Read Standard input when vm is running"
 
 )
-
+    
 (defun evaluate (instruction)
     "Evaluate string instruction and transform the instruction in a list of actions"
 )
 
 (defun run (instruction) (
     "Run the list of action"
+
+    (match instruction
+        ((case a))
+
+    )
 
 ))

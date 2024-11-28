@@ -1,6 +1,6 @@
 ;; Load the module manually
-(load "src/utils/hello-world.lisp")
-
+(load "src/utils/assembly.lisp")
+(load "src/utils/vm-functions.lisp")
 
 ;; Main function
 (defun main ()
