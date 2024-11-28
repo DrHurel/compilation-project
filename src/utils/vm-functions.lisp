@@ -1,10 +1,6 @@
-(defvar vm_list)
-(defvar frame_ptr)
-(defvar stack)
-
 (defun make_vm (name &rest options) 
   "Creates a virtual machine with a given name and optional options."
-  ;; Function body here
+  (setf vm (putf vm attr val))
 )
 
 (defun vm_load (vm code)

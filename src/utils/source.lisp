@@ -1,10 +1,10 @@
 
 (tagbody ;;cond equivalent
-    (when 'cond 'expr (go 'end))
-    (when 'cond 'expr (go 'end))
-    (when 'cond 'expr (go 'end))
-    (when 'cond 'expr (go 'end))
-    (when 'cond 'expr (go 'end))
+    (when 'cond 'expr (go end))
+    (when 'cond 'expr (go end))
+    (when 'cond 'expr (go end))
+    (when 'cond 'expr (go end))
+    (when 'cond 'expr (go end))
     end
 )
 
