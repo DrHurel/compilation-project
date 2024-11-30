@@ -24,7 +24,7 @@
       nil
       (cons (if (listp (car lst)) (nToBin (car lst)) (car lst)) (my-mapcar-arith (cdr lst)))))
 
-;;Transformation source à source pour les opérations arithmétique
+
 (defun nToBin (x)
   (if (listp x)
       (let ((operator (car x))
@@ -36,6 +36,9 @@
       x
   )
 )
+;;(print (nToBin '(+ 5 6)))
+
+;;(print (ntobin '(+ 5 6(- 5 7 8))))
 
 ;;Transformation pour les cond. L'entrée est la liste des op 
 ;;(print(cond_SAS '(('cond 'expr)
@@ -47,7 +50,21 @@
 ;;)
 (defun cond_SAS (x)
   (if (= (length x) 1)
-      (cons (cons 'if x) nil) 
+      (cons 'if (car x)) 
       (cons 'if (append (car x) (cons (cond_sas (cdr x)) nil )))
   )
 )
+
+(print(cond_SAS '(('cond 'expr)
+                ('cond 'expr)
+                ('cond 'expr)
+                ('cond 'expr)
+                (t 'expr)
+                )
+      )
+)
+
+;;if test-form
+;;    then-form
+;;    else-form
+
