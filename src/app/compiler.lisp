@@ -5,9 +5,9 @@
     (cond ((atom expr) (compile-atom expr asm))
           ((listp expr) 
             (cond ((equal (car expr) '+) (compile-add expr asm))
-                  ((equal (car expr) '-) 'form1)
-                  ((equal (car expr) '*) 'form1)
-                  ((equal (car expr) '/) 'form1)
+                  ((equal (car expr) '-) (compile-sub expr asm))
+                  ((equal (car expr) '*) (compile-mult expr asm))
+                  ((equal (car expr) '/) (compile-div expr asm))
                   ((equal (car expr) '=) 'form1)
                   ((equal (car expr) '<) 'form1)
                   ((equal (car expr) '<=) 'form1)
@@ -46,7 +46,49 @@
             (operand2 (car (cdr(cdr expr-s2s))))
             )
             (append (compile-lisp operand1 asm) (compile-lisp operand2 asm)
-            '((POP :R1)(POP :R0)(ADD :R1 :R0)(PUSH :R0)) asm
+            '((POP :R1)(POP :R0)(ADD :R0 :R1)(PUSH :R0)) asm
+            )
+        )
+    )
+)
+
+(defun compile-sub (expr asm)
+    (print (nToBin expr))
+    (let ((expr-s2s (nToBin expr)))
+        (let (
+            (operand1 (car(cdr expr-s2s)))
+            (operand2 (car (cdr(cdr expr-s2s))))
+            )
+            (append (compile-lisp operand1 asm) (compile-lisp operand2 asm)
+            '((POP :R1)(POP :R0)(SUB :R0 :R1)(PUSH :R0)) asm
+            )
+        )
+    )
+)
+
+(defun compile-mult (expr asm)
+    (print (nToBin expr))
+    (let ((expr-s2s (nToBin expr)))
+        (let (
+            (operand1 (car(cdr expr-s2s)))
+            (operand2 (car (cdr(cdr expr-s2s))))
+            )
+            (append (compile-lisp operand1 asm) (compile-lisp operand2 asm)
+            '((POP :R1)(POP :R0)(MULT :R0 :R1)(PUSH :R0)) asm
+            )
+        )
+    )
+)
+
+(defun compile-div (expr asm)
+    (print (nToBin expr))
+    (let ((expr-s2s (nToBin expr)))
+        (let (
+            (operand1 (car(cdr expr-s2s)))
+            (operand2 (car (cdr(cdr expr-s2s))))
+            )
+            (append (compile-lisp operand1 asm) (compile-lisp operand2 asm)
+            '((POP :R1)(POP :R0)(DIV :R0 :R1)(PUSH :R0)) asm
             )
         )
     )
@@ -54,5 +96,5 @@
 
 
 ;;(print (compile-lisp '5 '()))
-(print (compile-lisp '(+ 8 7 5) '()))
+(print (compile-lisp '(+ 8 7 (- 5 (* 5 7 8 (/ 2 5)))) '()))
 
