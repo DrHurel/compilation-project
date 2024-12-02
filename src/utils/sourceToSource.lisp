@@ -55,14 +55,14 @@
   )
 )
 
-(print(cond_SAS '(('cond 'expr)
-                ('cond 'expr)
-                ('cond 'expr)
-                ('cond 'expr)
-                (t 'expr)
-                )
-      )
-)
+;;(print(cond_SAS '(('cond 'expr)
+;;                ('cond 'expr)
+;;                ('cond 'expr)
+;;                ('cond 'expr)
+;;                (t 'expr)
+;;                )
+;;      )
+;;)
 
 ;;if test-form
 ;;    then-form

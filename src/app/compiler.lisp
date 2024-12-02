@@ -1,7 +1,7 @@
 (require "../utils/sourceToSource.lisp")
 
 (defun compile-lisp (expr asm )
-(print expr)
+;;(print expr)
     (cond ((atom expr) (compile-atom expr asm))
           ((listp expr) 
             (cond ((equal (car expr) '+) (compile-add expr asm))
@@ -39,7 +39,7 @@
 )
 
 (defun compile-add (expr asm)
-    (print (nToBin expr))
+    ;;(print (nToBin expr))
     (let ((expr-s2s (nToBin expr)))
         (let (
             (operand1 (car(cdr expr-s2s)))
@@ -53,7 +53,7 @@
 )
 
 (defun compile-sub (expr asm)
-    (print (nToBin expr))
+    ;;(print (nToBin expr))
     (let ((expr-s2s (nToBin expr)))
         (let (
             (operand1 (car(cdr expr-s2s)))
@@ -67,7 +67,7 @@
 )
 
 (defun compile-mult (expr asm)
-    (print (nToBin expr))
+    ;;(print (nToBin expr))
     (let ((expr-s2s (nToBin expr)))
         (let (
             (operand1 (car(cdr expr-s2s)))
@@ -81,7 +81,7 @@
 )
 
 (defun compile-div (expr asm)
-    (print (nToBin expr))
+    ;;(print (nToBin expr))
     (let ((expr-s2s (nToBin expr)))
         (let (
             (operand1 (car(cdr expr-s2s)))
