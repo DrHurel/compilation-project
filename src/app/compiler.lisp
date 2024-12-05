@@ -19,8 +19,8 @@
                   ((equal (car expr) 'not) (compile-not expr asm))
                   ((equal (car expr) 'defun) 'form1)
                   ((equal (car expr) 'let) 'form1)
-                  ((equal (car expr) 'cond) 'form1)
-                  ((equal (car expr) 'if) 'form1)
+                  ((equal (car expr) 'cond) (compile-if (cond_SAS (cdr expr)) asm))
+                  ((equal (car expr) 'if) (compile-if expr asm))
                   ((equal (car expr) 'when) 'form1)
                   ((atom  (car expr)) (append (compile-atom-in-list expr asm) (compile-atom-in-list (cdr expr) asm)));;Compilation d'une liste d'élem
                   (t 'form1);;evaluation des fct car sinon echec car soit on ne connait pas la fct doit ce n'est pas une fct
@@ -235,6 +235,30 @@
     )
 )
 
+
+(defun compile-if (expr asm)
+    (let (
+            (cond (car(cdr expr)))
+            (then (car (cdr(cdr expr))))
+            (else (car (cdr(cdr (cdr expr)))))
+            (etiq-fin (new-label))
+            (etiq-true (new-label))
+            )
+            (append (compile-lisp cond asm) 
+                    `((POP :R0)
+                    (CMP t :R0)
+                    (JTRUE ,etiq-true))
+                    (compile-lisp else asm)
+                    `((JMP ,etiq-fin)(LABEL ,etiq-true))
+                    (compile-lisp then asm)
+                    `((LABEL ,etiq-fin))
+                    asm
+            )
+        ))
 ;;(print (compile-lisp '5 '()))
-(print (compile-lisp '(not (+ 8 7 (- 5 (* 5 7 8 (/ 2 5))))5) '()))
+;;(print (compile-lisp '(not (+ 8 7 (- 5 (* 5 7 8 (/ 2 5))))5) '()))
+
+(print (compile-lisp '(if (= 5 6)
+    (- 5 6 8 7)
+    ) '()))
 
