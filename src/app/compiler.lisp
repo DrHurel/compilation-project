@@ -21,7 +21,7 @@
                   ((equal (car expr) 'let) 'form1)
                   ((equal (car expr) 'cond) (compile-if (cond_SAS (cdr expr)) asm))
                   ((equal (car expr) 'if) (compile-if expr asm))
-                  ((equal (car expr) 'when) 'form1)
+                  ((equal (car expr) 'when) (compile-when expr asm))
                   ((atom  (car expr)) (append (compile-atom-in-list expr asm) (compile-atom-in-list (cdr expr) asm)));;Compilation d'une liste d'élem
                   (t 'form1);;evaluation des fct car sinon echec car soit on ne connait pas la fct doit ce n'est pas une fct
             )
@@ -256,9 +256,19 @@
             )
         ))
 ;;(print (compile-lisp '5 '()))
-;;(print (compile-lisp '(not (+ 8 7 (- 5 (* 5 7 8 (/ 2 5))))5) '()))
+;;(print (compile-lisp '(+ 8 7 (- 5 (* 5 7 8 (/ 2 5)))) '()))
+(defun compile-when (expr asm)
+    (let ((queue (cdr expr)))
+        (compile-lisp (cons 'cond (cons queue nil)) asm))
+)
 
-(print (compile-lisp '(if (= 5 6)
-    (- 5 6 8 7)
-    ) '()))
+;;(print (compile-lisp '(cond(cond1 expr1)
+;;                (cond2 expr2)
+;;                (cond3 expr3)
+;;                (cond4 expr4)
+;;                (t expr5)
+;;               ) '()))
+
+(print (compile-lisp '(when (= c d) ( + 5 8)) '()))
+
 
