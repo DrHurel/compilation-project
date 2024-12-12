@@ -1,13 +1,12 @@
 ;; Définir une variable globale
-(defparameter labelCPT 0)
 
 ;; Fonction pour incrémenter la variable
-(defun incrementerCPT ()
-  (incf labelcpt))
+(defun incrementerCPT (cpt-label)
+  (incf cpt-label))
 
-(defun new-label ()
-    (let ((res (write-to-string  labelcpt)))
-        (incrementercpt)
+(defun new-label (cpt-label)
+    (let ((res (write-to-string  cpt-label)))
+        (setf cpt-label (+ 1 cpt-label))
         (concatenate 'string "label-" res)
     )
 )
