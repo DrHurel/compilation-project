@@ -319,6 +319,13 @@
             )
         )
 )
+;;Pour le funcall la pile ressembe à
+;;|Nombre de param         |
+;;|Ancien FP               |
+;;|Param1                  |
+;;|...                     |
+;;|ParamN                  |
+;;|ICI on est à l'ancier FP|
 
 (defun compile-funcall-parameter (expr asm env nb-var)
     (if (equal expr nil)
