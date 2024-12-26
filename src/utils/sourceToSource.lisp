@@ -1,3 +1,5 @@
+;;Transformation source à source de certaine fonctionnalité Clisp
+
 (defun lastOfList (mylist)
   (if (<= (length mylist) 1)
       (car mylist)
