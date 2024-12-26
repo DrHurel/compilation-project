@@ -330,7 +330,7 @@
 (defun compile-funcall-parameter (expr asm env nb-var)
     (if (equal expr nil)
         nil
-        (cons (compile-lisp (car expr) asm env nb-var) (compile-funcall-parameter (cdr expr) asm env nb-var))
+        (append (compile-lisp (car expr) asm env nb-var) (compile-funcall-parameter (cdr expr) asm env nb-var))
         )
     )
 
