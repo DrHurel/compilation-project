@@ -4,4 +4,4 @@
 LISP="clisp"
 
 # Run CLISP and load project files
-$LISP -q -i "src/utils/hello-world.lisp" -i "src/app/vm.lisp" -x "(main)"
+$LISP -q -i "src/app/compiler.lisp"
