@@ -1,113 +1,249 @@
-(require "src/utils/attribute.lisp")
+(require "src/utils/tools.lisp")
 
-;; (LOAD <src> <dest>) chargement de mémoire à registre
-(defun asm-LOAD (vm src dest)
-  (if (consp src)
-    (let ((base (car src))
-      (offset (cadr src)))
-      (let ((value (mem-get vm (+ (reg-get vm base) offset))))
-      (reg-set vm destination value)))
-      (reg-set vm destination src)
-  )
-)
+(defun asm-jump (vm insn)
+  (let ((label (second insn)))
+    (format t "JUMP: Label ~A~%" label)
+    (let ((target (etiq-get vm label)))
+      (if target
+          (attr-set vm :PC target)
+          (error "Undefined label: ~a" label)))))
 
-;; (MOVE <src> <dest>) mouvement de registre à registre
-(defun asm-MOVE (vm src dest)
-  `(setf ,dest ,src))
+(defun asm-add (vm insn)
+  (let ((val1 (attr-get vm (second insn)))
+        (val2 (attr-get vm (third insn))))
+    (unless (and (numberp val1) (numberp val2))
+      (error "ADD requires numeric operands"))
+    (let ((reg1 (second insn))
+          (reg2 (third insn)))
+      (let ((val1 (attr-get vm reg1))
+            (val2 (attr-get vm reg2)))
+        (format t "ADD: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
+        (let ((result (+ val1 val2)))
+          (format t "ADD Result: ~A~%" result)
+          (attr-set vm reg1 result))))))
 
-;; (ADD <src> <dest>) addition
-(defun asm-ADD (vm src dest)
-  `(setf ,dest (+ ,dest ,src)))
+(defun asm-sub (vm insn)
+  (let ((reg1 (second insn))
+        (reg2 (third insn)))
+    (let ((val1 (attr-get vm reg1))
+          (val2 (attr-get vm reg2)))
+      (format t "SUB: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
+      (let ((result (- val1 val2)))
+        (format t "SUB Result: ~A~%" result)
+        (attr-set vm reg1 result)))))
 
-;; (SUB <src> <dest>) soustraction
-(defun asm-SUB (vm src dest)
-  `(setf ,dest (- ,dest ,src)))
+(defun asm-mul (vm insn)
+  (let ((reg1 (second insn))
+        (reg2 (third insn)))
+    (let ((val1 (attr-get vm reg1))
+          (val2 (attr-get vm reg2)))
+      (format t "MUL: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
+      (let ((result (* val1 val2)))
+        (format t "MUL Result: ~A~%" result)
+        (attr-set vm reg1 result)))))
 
-;; (MUL <src> <dest>) multiplication
-(defun asm-MUL (vm src dest)
-  `(setf ,dest (* ,dest ,src)))
+(defun asm-div (vm insn)
+  (let ((reg1 (second insn))
+        (reg2 (third insn)))
+    (let ((val1 (attr-get vm reg1))
+          (val2 (attr-get vm reg2)))
+      (format t "DIV: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
+      (if (zerop val2)
+          (error "Division by zero")
+          (let ((result (/ val1 val2)))
+            (format t "DIV Result: ~A~%" result)
+            (attr-set vm reg1 result))))))
 
-;; (DIV <src> <dest>) division
-(defun asm-DIV (vm src dest)
-  `(setf ,dest (/ ,dest ,src)))
+(defun asm-jmp (vm insn)
+  (let ((label (second insn)))
+    (format t "JMP: Label ~A~%" label)
+    (if (fboundp (intern (string-upcase label)))
+        (progn
+          ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
+          (let ((args '()))
+            ;; Récupérer le nombre d'arguments du stack
+            (let ((arg-count (mem-get vm (attr-get vm :SP))))
+              ;; Récupérer les arguments du stack
+              (dotimes (i arg-count)
+                (let ((arg-value (mem-get vm (- (attr-get vm :SP) (+ i 1)))))
+                  (if (is-debug vm)
+                      (format t "Arg: ~A~%" arg-value))
+                  (push arg-value args)))
+              ;; Appeler la fonction Lisp avec les arguments et stocker le résultat dans R0
+              (let ((result (apply (intern (string-upcase label)) args)))
+                (attr-set vm :R0 result)))))
+        ;; Sinon, signaler une erreur
+        (error "Etiquette non définie: ~a" label))))
 
-;; (INCR <dest>) incrément
-(defun asm-INCR (vm dest)
-  `(setf ,dest (1+ ,dest)))
+(defun asm-jsr (vm insn)
+  ;; Extraire l'étiquette de l'instruction
+  (let ((label (second insn)))
+    (if (or (numberp label) (is-etiq-set vm label))
+        (progn
+          ;; Si l'étiquette est définie, continuer avec l'exécution normale
+          (attr-set vm :R1 (- (pc-get vm) 1))
+          (asm-push vm '(PUSH :R1))
+          (asm-jmp vm insn))
+        ;; Gérer le cas où l'étiquette n'est pas définie
+        (if (fboundp (intern (string-upcase label)))
+            (progn
+              ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
+              (let ((args '()))
+                ;; Récupérer le nombre d'arguments du stack
+                (let ((arg-count (mem-get vm (attr-get vm :SP))))
+                  ;; Récupérer les arguments du stack
+                    (dotimes (i arg-count)
+                    (let ((arg-value (mem-get vm (- (attr-get vm :SP) (+ i 1)))))
+                      (if (is-debug vm)
+                          (format t "Arg: ~A~%" arg-value))
+                      (push arg-value args)))
+                  ;; Appeler la fonction Lisp avec les arguments et stocker le résultat dans R0
+                  (let ((result (apply (intern (string-upcase label)) args)))
+                    (attr-set vm :R0 result)))))
+            ;; Sinon, signaler une erreur
+            (error "Etiquette non définie: ~a" label)))))
 
-;; (DECR <dest>) décrément
-(defun asm-DECR (vm dest)
-  `(setf ,dest (1- ,dest)))
+(defun asm-cmp (vm insn)
+  (let ((reg1 (second insn))
+        (reg2 (third insn)))
+    (let ((val1 (cond 
+                  ((is-const reg1) (second reg1))
+                  ((keywordp reg1) (attr-get vm reg1))))
+          (val2 (cond 
+                  ((is-const reg2) (second reg2))
+                  ((keywordp reg2) (attr-get vm reg2)))))
+      (format t "CMP: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
+      ;; Gérer les cas où val1 ou val2 sont t ou nil
+      (cond ((or (eq val1 't) (eq val1 'nil) (eq val2 't) (eq val2 'nil))
+             ;; Comparaison d'égalité seulement
+             (attr-set vm :FEQ (if (eq val1 val2) 1 0))
+             (format t "FEQ set to ~A~%" (attr-get vm :FEQ)))
+            (t
+             ;; Comparaison numérique
+             (attr-set vm :FEQ (if (= val1 val2) 1 0))
+             (attr-set vm :FLT (if (< val1 val2) 1 0))
+             (attr-set vm :FGT (if (> val1 val2) 1 0))
+             (format t "FEQ set to ~A, FLT set to ~A, FGT set to ~A~%"
+                     (attr-get vm :FEQ) (attr-get vm :FLT) (attr-get vm :FGT)))))))
 
-;; (PUSH <src>) empiler
-(defun asm-PUSH (vm src)
-  `(push ,src *stack*))
+(defun asm-jgt (vm insn)
+  (if (eq (attr-get vm :FGT) 1)
+      (asm-jmp vm insn)))
 
-;; (POP <dest>) dépiler
-(defun asm-POP (vm dest)
-  `(setf ,dest (pop *stack*)))
+(defun asm-jge (vm insn)
+  (if (or (eq (attr-get vm :FGT) 1) (eq (attr-get vm :FEQ) 1))
+      (asm-jmp vm insn)))
 
-;; (LABEL <label>) déclaration d’étiquette
-(defun asm-LABEL (label)
-  `(progn ,@(declare-label label)))
+(defun asm-jlt (vm insn)
+  (if (eq (attr-get vm :FLT) 1)
+      (asm-jmp vm insn)))
 
-;; (JMP <label>) saut inconditionnel à une étiquette
-(defun asm-JMP (vm label)
-  `(go ,label))
+(defun asm-jle (vm insn)
+  (if (or (eq (attr-get vm :FLT) 1) (eq (attr-get vm :FEQ) 1))
+      (asm-jmp vm insn)))
 
-;; (JSR <label>) saut avec retour
-(defun asm-JSR (vm label)
-  `(progn (push *program-counter* *stack*)
-          (go ,label)))
+(defun asm-jeq (vm insn)
+  (if (eq (attr-get vm :FEQ) 1)
+      (asm-jmp vm insn)))
 
-;; (RTN) retour
-(defun asm-RTN (vm)
-  `(setf *program-counter* (pop *stack*)))
+(defun asm-jne (vm insn)
+  (if (eq (attr-get vm :FEQ) 0)
+      (asm-jmp vm insn)))
 
-;; (CMP <src1> <src2>) comparaison
-(defun asm-CMP (vm src1 src2)
-  `(setf *compare-result* (compare ,src1 ,src2)))
+(defun asm-test(vm insn)
+  (let ((dst (second insn)))
+    (let ((v (cond 
+            ((is-const dst) (second dst))
+            ((keywordp dst) (attr-get vm dst)))))
+      (attr-set vm :FNIL (null v)))))
 
-;; (JGT <label>) saut si plus grand
-(defun asm-JGT (vm label)
-  `(when (> *compare-result* 0) (go ,label)))
+(defun asm-jtrue (vm insn)
+  (if (not (attr-get vm :FNIL))
+    (asm-jmp vm insn)))
 
-;; (JGE <label>) saut si plus grand ou égal
-(defun asm-JGE (vm label)
-  `(when (>= *compare-result* 0) (go ,label)))
+(defun asm-jnil (vm insn)
+  (if (attr-get vm :FNIL)
+    (asm-jmp vm insn)))
 
-;; (JLT <label>) saut si plus petit
-(defun asm-JLT (vm label)
-  `(when (< *compare-result* 0) (go ,label)))
+(defun asm-move (vm insn)
+  (let ((src (second insn))
+        (dst (third insn)))
+    (let ((value (cond
+                   ((numberp src) src)
+                   ((keywordp src) (attr-get vm src))
+                   ((is-const src) (second src))
+                   (t (error "Invalid source for MOVE: ~A" src)))))
+      (format t "MOVE: Source ~A, Value ~A, Destination ~A~%" src value dst)
+      (attr-set vm dst value))))
 
-;; (JLE <label>) saut si plus petit ou égal
-(defun asm-JLE (vm label)
-  `(when (<= *compare-result* 0) (go ,label)))
+(defun asm-incr-decr (vm insn op)
+  (let ((attr (second insn)))
+    (if (keywordp attr)
+        (attr-set vm attr (funcall op (attr-get vm attr) 1)))))
 
-;; (JEQ <label>) saut si égal
-(defun asm-JEQ (vm label)
-  `(when (= *compare-result* 0) (go ,label)))
+(defun asm-incr (vm insn)
+  (asm-incr-decr vm insn #'+))
 
-;; (JNE <label>) saut si différent
-(defun asm-JNE (vm label)
-  `(when (/= *compare-result* 0) (go ,label)))
+(defun asm-decr (vm insn)
+  (asm-incr-decr vm insn #'-))
 
-;; (TEST <src>) comparaison à NIL
-(defun asm-TEST (vm src)
-  `(setf *compare-result* (not (null ,src))))
+(defun asm-push (vm insn)
+  (let ((reg (second insn)))
+    (when (>= (attr-get vm :SP) (attr-get vm :MAX_MEM))
+      (error "Stack overflow"))
+    (let ((value (attr-get vm reg)))
+      (format t "PUSH: Register ~A, Value ~A~%" reg value)
+      (let ((sp (attr-get vm :SP)))
+        (mem-set vm sp value)
+        (attr-set vm :SP (+ sp 1))))))
 
-;; (JTRUE <label>) saut si non-NIL
-(defun asm-JTRUE (vm label)
-  `(when *compare-result* (go ,label)))
+(defun asm-load (vm insn)
+  (let ((src (second insn)) (dst (third insn)))
+    (cond
+      ((numberp src) (attr-set vm dst (mem-get vm src)))
+      ((keywordp src) (attr-set vm dst (mem-get vm (attr-get vm src))))
+      ((is-offset src)
+        (let ((offset (third src)) (attr (second src)))
+          (attr-set vm dst (mem-get vm (+ (attr-get vm attr) offset)))))
+      ((is-global-var src)
+        (attr-set vm dst (etiq-get vm (second src))))
+      (t (format t "La source doit être soit un nombre, soit un registre, soit un offset: ~A~%" insn)))))
 
-;; (JNIL <label>) saut si NIL
-(defun asm-JNIL (vm label)
-  `(when (null *compare-result*) (go ,label)))
+(defun asm-store (vm insn)
+  (let ((src (second insn)) (dst (third insn)))
+    (let ((srcMapped (cond
+                      ((is-const src) (second src))
+                      ((keywordp src) (attr-get vm src))
+                      (t (format t "La source doit être soit une constante, soit un registre: ~A~%" insn))))
+          (dstMapped (cond
+                      ((numberp dst) dst)
+                      ((keywordp dst) (attr-get vm dst))
+                      ((is-offset dst) (+ (third dst) (attr-get vm (second dst))))))
+          (isGlobalVar (is-global-var dst)))
+      (if isGlobalVar
+          (etiq-set vm (second dst) srcMapped)
+          (mem-set vm dstMapped srcMapped)))))
 
-;; (NOP) rien
-(defun asm-NOP (vm)
+(defun asm-pop (vm insn)
+  (let ((reg (second insn)))
+    (let ((sp (attr-get vm :SP)))
+      (let ((value (mem-get vm (- sp 1))))
+        (format t "POP: Register ~A, Value ~A~%" reg value)
+        (attr-set vm reg value)
+        (attr-set vm :SP (- sp 1))))))
+
+(defun asm-nop (vm insn)
   nil)
 
-;; (HALT) arrêt
-(defun asm-HALT (vm)
-  `(error "Program halted"))
+(defun asm-halt (vm insn)
+  (set-running vm 0))
+
+(defun asm-mult (vm insn)
+  (let ((reg1 (second insn))
+        (reg2 (third insn)))
+    (let ((val1 (attr-get vm reg1))
+          (val2 (attr-get vm reg2)))
+      (format t "MULT: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" 
+              reg1 val1 reg2 val2)
+      (format t "MULT Result: ~A~%" (* val1 val2))
+      (attr-set vm reg1 (* val1 val2)))))

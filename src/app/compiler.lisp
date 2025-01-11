@@ -89,7 +89,7 @@
             (operand2 (car (cdr(cdr expr-s2s))))
             )
             (append (compile-lisp operand1 asm env nb-var) (compile-lisp operand2 asm env nb-var)
-            '((POP :R1)(POP :R0)(MULT :R0 :R1)(PUSH :R0)) asm
+            '((POP :R1)(POP :R0)(MUL :R0 :R1)(PUSH :R0)) asm
             )
         )
     )
