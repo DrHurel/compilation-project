@@ -76,32 +76,17 @@
         (error "Etiquette non définie: ~a" label))))
 
 (defun asm-jsr (vm insn)
-  ;; Extraire l'étiquette de l'instruction
-  (let ((label (second insn)))
-    (if (or (numberp label) (is-etiq-set vm label))
+  (let* ((label (cadr insn))
+         (addr (get-label vm label)))
+    (if addr
         (progn
-          ;; Si l'étiquette est définie, continuer avec l'exécution normale
-          (attr-set vm :R1 (- (pc-get vm) 1))
-          (asm-push vm '(PUSH :R1))
-          (asm-jmp vm insn))
-        ;; Gérer le cas où l'étiquette n'est pas définie
-        (if (fboundp (intern (string-upcase label)))
-            (progn
-              ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
-              (let ((args '()))
-                ;; Récupérer le nombre d'arguments du stack
-                (let ((arg-count (mem-get vm (attr-get vm :SP))))
-                  ;; Récupérer les arguments du stack
-                    (dotimes (i arg-count)
-                    (let ((arg-value (mem-get vm (- (attr-get vm :SP) (+ i 1)))))
-                      (if (is-debug vm)
-                          (format t "Arg: ~A~%" arg-value))
-                      (push arg-value args)))
-                  ;; Appeler la fonction Lisp avec les arguments et stocker le résultat dans R0
-                  (let ((result (apply (intern (string-upcase label)) args)))
-                    (attr-set vm :R0 result)))))
-            ;; Sinon, signaler une erreur
-            (error "Etiquette non définie: ~a" label)))))
+          (push-frame vm)
+          (setf (attr-get vm :PC) addr))
+        (error "Undefined label: ~A" label))))
+
+(defun get-label (vm label)
+  (let ((labels (attr-get vm +ETIQ+)))
+    (cdr (assoc label labels))))
 
 (defun asm-cmp (vm insn)
   (let ((reg1 (second insn))
@@ -183,6 +168,12 @@
 
 (defun asm-incr (vm insn)
   (asm-incr-decr vm insn #'+))
+
+
+(defun asm-ret (vm insn)
+  (let ((return-addr (mem-get vm (- (attr-get vm :SP) 1))))
+    (pc-set vm return-addr)
+    (asm-pop vm '(POP :R0))))
 
 (defun asm-decr (vm insn)
   (asm-incr-decr vm insn #'-))

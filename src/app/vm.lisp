@@ -1,20 +1,13 @@
 (require "src/utils/assembly.lisp")
+(require "src/utils/attribute.lisp")
+
 
 ;; Constants
 (defconstant +SOC+ 'SOC)  ; Start of Code
-(defconstant +EOC+ 'EOC)  ; End of Code 
+(defconstant +EOC+ 'EOC)  ; End of Code
 (defconstant +EOF+ 'EOF)  ; End of File
 (defconstant +ETIQ+ 'ETIQ)  ; Labels/etiquettes table
 
-;; Attribute management functions
-(defun attr-set (vm attr value)
-  (setf (gethash attr vm) value))
-
-(defun attr-get (vm attr)
-  (gethash attr vm))
-
-(defun attr-array-init (vm attr size)
-  (attr-set vm attr (make-array size :initial-element nil)))
 
 ;; Memory access functions
 (defun mem-set (vm addr value)
@@ -76,19 +69,6 @@
 (defun ms-get (vm)
   (attr-get vm :MS))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 (defun update-labels-for-jumps (vm)
   (let ((code-start (attr-get vm +SOC+))
         (code-end (attr-get vm +EOF+)))
@@ -98,18 +78,11 @@
                    (member (first insn)
                            '(JMP JSR JGT JGE JLT JLE JEQ JNE JTRUE JNIL)))
           (let ((label (second insn)))
-            (when (stringp label)
+            (when (stringp JUMP)
               (let ((target (etiq-get vm label)))
                 (when target
                   (setf (second insn) target)
                   (mem-set vm addr insn))))))))))
-
-;; Arithmetic operation handlers
-(defun perform-arithmetic-op (vm src dst op)
-  (let ((src-value (if (is-const src) (second src) (attr-get vm src)))
-        (dst-value (attr-get vm dst)))
-    (attr-set vm dst (funcall op dst-value src-value))))
-
 
 
 (defun vm-reset (vm &optional (size 1000))
@@ -171,21 +144,26 @@
     (vm-variable-set vm +EOC+ (+ initial-pc 1))
     (update-labels-for-jumps vm)))
 
+
+
 (defun vm-execute (vm)
   (loop while (and (>= (pc-get vm) (vm-variable-get vm +EOC+))
                    (is-running vm)) do
     (let ((insn (mem-get vm (pc-get vm))))
       (if (is-debug vm) (format t "~A " insn))
       (case (first insn)
+        (LABEL (asm-label vm insn))
+        (RET (asm-ret vm insn))
         (PUSH (asm-push vm insn))
         (POP (asm-pop vm insn))
         (LOAD (asm-load vm insn))
         (STORE (asm-store vm insn))
         (ADD (asm-add vm insn))
         (SUB (asm-sub vm insn))
-        (MUL (asm-mul vm insn))
-        (DIV (asm-div vm insn))
-        (JMP (asm-jmp vm insn))
+        (MUL (asm-mul vm insn))    ;; Use MUL consistently
+        (MULT (asm-mul vm insn))   ;; Allow both MUL and MULT
+        (JUMP (asm-jmp vm insn))   ;; Map JUMP to JMP
+        (JMP (asm-jmp vm insn))    ;; Keep JMP
         (JSR (asm-jsr vm insn))
         (JGT (asm-jgt vm insn))
         (JGE (asm-jge vm insn))
@@ -210,5 +188,4 @@
                 (attr-get vm :SP)
                 (attr-get vm :FP)
                 (stack-get vm))))))
-
 

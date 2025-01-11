@@ -286,12 +286,13 @@
 )
 
 (defun compile-parameter (expr asm env nb-var)
-(if (= (length expr) 0)
-    nil
-    (cons (cons (car expr) (- 0(length expr))) (compile-parameter (cdr expr) asm env nb-var))
-    )  
-)
-
+  (if (= (length expr) 0)
+      nil
+      (cons (cons (if (symbolp (car expr))
+                     (car expr)
+                     (intern (string (car expr))))
+                 (- 0 (length expr)))
+            (compile-parameter (cdr expr) asm env nb-var))))
 
 (defun compile-let (expr asm env nb-var)
 ;;(print asm)

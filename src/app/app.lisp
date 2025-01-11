@@ -4,20 +4,12 @@
 
 (defun get-command-line-args ()
   #+clisp ext:*args*
-  #+sbcl (cdr sb-ext:*posix-argv*)
-  #+clozure (cdr ccl:*command-line-argument-list*)
-  #+ecl (loop for i from 1 below (si:argc) collect (si:argv i))
-  #+allegro (cdr (system:command-line-arguments))
-  #-(or clisp sbcl clozure ecl allegro)
+  #-clisp
   (error "get-command-line-args not implemented for this Lisp implementation"))
 
 (defun exit-program (&optional (status 0))
-  #+sbcl (sb-ext:exit :code status)
-  #+clozure (ccl:quit status)
   #+clisp (ext:exit status)
-  #+ecl (si:quit status)
-  #+allegro (excl:exit status :quiet t)
-  #-(or sbcl clozure clisp ecl allegro)
+  #-clisp
   (error "exit-program not implemented for this Lisp implementation"))
 
 (defun print-usage ()
@@ -31,6 +23,7 @@
   (format t "Example:~%")
   (format t "  lisp --load vm-cli.lisp -- --debug run \"(+ 2 3)\"~%"))
 
+;; In app.lisp, update parse-args:
 (defun parse-args (args)
   (let ((options '())
         (command nil)
@@ -62,20 +55,20 @@
   (let* ((vm-size (or (cdr (assoc :size options)) 1000))
          (debug-mode (cdr (assoc :debug options)))
          (vm (make-vm vm-size)))
-    
+
     (when debug-mode
       (attr-set vm :DEBUG t))
 
     (format t "Compiling expression: ~A~%" expr)
     (let* ((parsed-expr (read-from-string expr))
            (compiled-code (compile-i parsed-expr)))
-      
-      (format t "Loading program...~%")
-      (vm-load vm compiled-code)
-      
-      (format t "Executing...~%")
+          (format t "Loading program...~%")
+          (print compiled-code)
+          (vm-load vm compiled-code)
+
+          (format t "Executing...~%")
       (vm-execute vm)
-      
+
       (let ((result (attr-get vm :R0)))
         (format t "Result: ~A~%" result)))))
 
