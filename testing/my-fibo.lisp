@@ -1,4 +1,4 @@
-(defun fibo (n)
+((defun fibo (n)
     (cond 
         (< n 0)(error "Not a positive int")
         (= n 0) n
@@ -8,4 +8,5 @@
 
 )   
 
-
+(fibo 4)
+)

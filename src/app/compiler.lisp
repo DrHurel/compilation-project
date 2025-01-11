@@ -1,5 +1,5 @@
-(require "../utils/sourceToSource.lisp")
-(require "../utils/label.lisp")
+(require "src/utils/sourceToSource.lisp")
+(require "src/utils/label.lisp")
 
 (defun compile-lisp (expr asm env nb-var)
 ;;(print expr)
@@ -370,3 +370,9 @@
 
 
 (print (compile-lisp '(funcall '(0 1 2) param2) '() '() 0))
+;;(print (compile-lisp '(funcall param1 param2) '() '() 0))
+
+
+(defun compile-i (func)
+    (compile-lisp func '() '() 0)
+)
