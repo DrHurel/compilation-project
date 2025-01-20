@@ -2,6 +2,10 @@
 (require "../utils/label.lisp")
 
 (defun compile-lisp (expr asm env nb-var)
+;;(print expr)
+;;(print (car expr))
+;;(print (equal 'QUOTE (car expr)))
+;;(print (listp expr))
     (cond ((atom expr) (compile-atom expr asm env nb-var))
           ((listp expr) 
             (cond ((equal (car expr) '+) (compile-add expr asm env nb-var))
@@ -21,6 +25,7 @@
                   ((equal (car expr) 'cond) (compile-if (cond_SAS (cdr expr)) asm env nb-var))
                   ((equal (car expr) 'if) (compile-if expr asm env nb-var))
                   ((equal (car expr) 'when) (compile-when expr asm env nb-var))
+                  ((equal 'QUOTE (car expr)) (compile-atom expr asm env nb-var))
                   ;;((atom  (car expr)) (append (compile-atom-in-list expr asm env) (compile-atom-in-list (cdr expr) asm env)));;Compilation d'une liste d'élem
                   (t (compile-funcall expr asm env nb-var));;evaluation des fct car sinon echec car soit on ne connait pas la fct doit ce n'est pas une fct
             )
@@ -364,4 +369,4 @@
 ;;                            (+ var1 var3)) '() '() 0))
 
 
-(print (compile-lisp '(funcall param1 param2) '() '() 0))
+(print (compile-lisp '(funcall '(0 1 2) param2) '() '() 0))
