@@ -276,7 +276,7 @@
 (defun compile-defun (expr asm env nb-var)
     (let (
           (parameter-assoc (compile-parameter (car (cdr expr)) '() '() nb-var))
-          (label-fun (concatenate 'string "begin-" (write-to-string  (car expr))))
+          (label-fun (concatenate 'string "" (write-to-string  (car expr))))
           (label-exit (concatenate 'string "exit-" (write-to-string  (car expr))))
         )
         (append `((JUMP ,label-exit) 
@@ -375,5 +375,6 @@
 
 
 (defun compile-i (func)
+    (print func)
     (compile-lisp func '() '() 0)
 )

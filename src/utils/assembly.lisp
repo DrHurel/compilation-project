@@ -57,23 +57,25 @@
 (defun asm-jmp (vm insn)
   (let ((label (second insn)))
     (format t "JMP: Label ~A~%" label)
-    (if (fboundp (intern (string-upcase label)))
-        (progn
-          ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
-          (let ((args '()))
-            ;; Récupérer le nombre d'arguments du stack
-            (let ((arg-count (mem-get vm (attr-get vm :SP))))
-              ;; Récupérer les arguments du stack
-              (dotimes (i arg-count)
-                (let ((arg-value (mem-get vm (- (attr-get vm :SP) (+ i 1)))))
-                  (if (is-debug vm)
-                      (format t "Arg: ~A~%" arg-value))
-                  (push arg-value args)))
-              ;; Appeler la fonction Lisp avec les arguments et stocker le résultat dans R0
-              (let ((result (apply (intern (string-upcase label)) args)))
-                (attr-set vm :R0 result)))))
-        ;; Sinon, signaler une erreur
-        (error "Etiquette non définie: ~a" label))))
+    (if (numberp label)
+        (attr-set vm :PC label)
+        (if (fboundp (intern (string-upcase label)))
+            (progn
+              ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
+              (let ((args '()))
+                ;; Récupérer le nombre d'arguments du stack
+                (let ((arg-count (mem-get vm (attr-get vm :SP))))
+                  ;; Récupérer les arguments du stack
+                  (dotimes (i arg-count)
+                    (let ((arg-value (mem-get vm (- (attr-get vm :SP) (+ i 1)))))
+                      (if (is-debug vm)
+                          (format t "Arg: ~A~%" arg-value))
+                      (push arg-value args)))
+                  ;; Appeler la fonction Lisp avec les arguments et stocker le résultat dans R0
+                  (let ((result (apply (intern (string-upcase label)) args)))
+                    (attr-set vm :R0 result)))))
+            ;; Sinon, signaler une erreur
+            (error "Etiquette non définie: ~a" label)))))
 
 (defun asm-jsr (vm insn)
   (let* ((label (cadr insn))
@@ -194,6 +196,7 @@
       ((numberp src) (attr-set vm dst (mem-get vm src)))
       ((keywordp src) (attr-set vm dst (mem-get vm (attr-get vm src))))
       ((is-offset src)
+        ;;(print "Offset")
         (let ((offset (third src)) (attr (second src)))
           (attr-set vm dst (mem-get vm (+ (attr-get vm attr) offset)))))
       ((is-global-var src)
@@ -234,7 +237,4 @@
         (reg2 (third insn)))
     (let ((val1 (attr-get vm reg1))
           (val2 (attr-get vm reg2)))
-      (format t "MULT: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" 
-              reg1 val1 reg2 val2)
-      (format t "MULT Result: ~A~%" (* val1 val2))
       (attr-set vm reg1 (* val1 val2)))))

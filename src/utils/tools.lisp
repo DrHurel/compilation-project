@@ -2,7 +2,7 @@
 
 (defun is-offset (value)
   (and (listp value)
-       (eq (first value) 'FP)
+       (eq (first value) `FP)
        (numberp (second value))))
 
 (defun is-etiq-set (vm label)

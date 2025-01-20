@@ -16,9 +16,11 @@
         "JTRUE",
         "keywordp",
         "listp",
+        "nbparam",
         "numberp",
         "progn",
         "putf",
+        "Sauvegarde",
         "setf",
         "stringp",
         "tagbody"

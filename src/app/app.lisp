@@ -59,18 +59,19 @@
     (when debug-mode
       (attr-set vm :DEBUG t))
 
-    (format t "Compiling expression: ~A~%" expr)
-    (let* ((parsed-expr (read-from-string expr))
-           (compiled-code (compile-i parsed-expr)))
-          (format t "Loading program...~%")
-          (print compiled-code)
-          (vm-load vm compiled-code)
+    (format t "Compiling expressions: ~A~%" expr)
+    
+    (dolist (single-expr (read-from-string (format nil "(~A)" expr)))
+      (let* ((compiled-code (compile-i single-expr)))
+        (format t "Loading program...~%")
+        (print compiled-code)
+        (vm-load vm compiled-code)
 
-          (format t "Executing...~%")
-      (vm-execute vm)
-
-      (let ((result (attr-get vm :R0)))
-        (format t "Result: ~A~%" result)))))
+        ))
+    (format t "Executing...~%")
+        (vm-execute vm)
+    (let ((result (attr-get vm :R0)))
+      (format t "Result: ~A~%" result))))
 
 (defun main ()
   (let ((args (get-command-line-args)))

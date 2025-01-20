@@ -13,22 +13,22 @@
 (defun mem-set (vm addr value)
   (when (or (< addr 0) (>= addr (length (attr-get vm :MEM))))
     (error "Memory access out of bounds: ~A" addr))
-  (format t "Setting memory at address ~A to value ~A~%" addr value)
+  ;;(format t "Setting memory at address ~A to value ~A~%" addr value)
   (setf (aref (attr-get vm :MEM) addr) value))
 
 (defun mem-get (vm addr)
   (let ((value (aref (attr-get vm :MEM) addr)))
-    (format t "Getting memory from address ~A: ~A~%" addr value)
+    ;;(format t "Getting memory from address ~A: ~A~%" addr value)
     value))
 
 ;; Variable management
 (defun vm-variable-set (vm var value)
-  (format t "Setting variable ~A to value ~A~%" var value)
+  ;;(format t "Setting variable ~A to value ~A~%" var value)
   (attr-set vm var value))
 
 (defun vm-variable-get (vm var)
   (let ((value (attr-get vm var)))
-    (format t "Getting variable ~A: ~A~%" var value)
+    ;;(format t "Getting variable ~A: ~A~%" var value)
     value))
 
 ;; Program counter management
@@ -70,20 +70,36 @@
   (attr-get vm :MS))
 
 (defun update-labels-for-jumps (vm)
-  (let ((code-start (attr-get vm +SOC+))
-        (code-end (attr-get vm +EOF+)))
-    (loop for addr from code-start downto code-end do
+  (format t "Updating labels for jumps~%")
+  (let ((code-start (vm-variable-get vm +SOC+))
+        (code-end (vm-variable-get vm +EOC+)))  ; Corrected from +EOF+ to +EOC+
+    (format t "Code range: ~A to ~A~%" code-end code-start)
+    ;; First pass: register all labels
+    (loop for addr from code-end to code-start do
       (let ((insn (mem-get vm addr)))
         (when (and (listp insn)
-                   (member (first insn)
-                           '(JMP JSR JGT JGE JLT JLE JEQ JNE JTRUE JNIL)))
-          (let ((label (second insn)))
-            (when (stringp JUMP)
-              (let ((target (etiq-get vm label)))
-                (when target
+                  (eq (first insn) 'LABEL))
+          (format t "Registering label: ~A at address ~A~%" (second insn) addr)
+          (etiq-set vm (string (second insn)) addr))))
+    
+    ;; Second pass: resolve jump targets
+    (loop for addr from code-end to code-start do
+      (let ((insn (mem-get vm addr)))
+        (when (and (listp insn)
+                  (member (first insn) 
+                         '(JUMP JMP JSR JGT JGE JLT JLE JEQ JNE JTRUE JNIL)))
+          ;;(format t "Processing jump instruction at ~A: ~A~%" addr insn)
+          (let* ((label (second insn))
+                 (target (if (integerp label)
+                             label
+                             (etiq-get vm (string label)))))
+                ;;(print (format nil "Label: ~A, Target: ~A" label target))
+            (if target
+                (progn
+                  ;;(format t "Resolved label ~A to address ~A~%" label target)
                   (setf (second insn) target)
-                  (mem-set vm addr insn))))))))))
-
+                  (mem-set vm addr insn))
+                (format t "Warning: Unresolved label ~A~%" label))))))))
 
 (defun vm-reset (vm &optional (size 1000))
   (let ((size (max size 1000))
@@ -96,7 +112,7 @@
     (attr-set vm :MAX_MEM size)
     (attr-array-init vm :MEM size)
     (vm-variable-set vm +SOC+ (- size 1))
-    (vm-variable-set vm ETIQ (make-hash-table))
+    (vm-variable-set vm +ETIQ+ (make-hash-table :test 'equal))  ; Corrected from ETIQ to +ETIQ+
     (pc-set vm (- size 1))
     (bp-set vm base-vars)
     (sp-set vm (bp-get vm))
@@ -133,6 +149,7 @@
     vm))
 
 (defun vm-load (vm program)
+  ;;(print "Loading program into VM")
   (let ((initial-pc (- (or (vm-variable-get vm +EOC+)
                           (+ (pc-get vm) 1)) 1)))
     (loop for insn in program do
@@ -144,11 +161,10 @@
     (vm-variable-set vm +EOC+ (+ initial-pc 1))
     (update-labels-for-jumps vm)))
 
-
-
 (defun vm-execute (vm)
   (loop while (and (>= (pc-get vm) (vm-variable-get vm +EOC+))
                    (is-running vm)) do
+    ;;(print (format nil "Stack: ~A%" (stack-get vm)))
     (let ((insn (mem-get vm (pc-get vm))))
       (if (is-debug vm) (format t "~A " insn))
       (case (first insn)
