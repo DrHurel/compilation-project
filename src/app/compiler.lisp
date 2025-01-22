@@ -280,7 +280,7 @@
           (label-exit (concatenate 'string "exit-" (write-to-string  (car expr))))
         )
         (append `((JUMP ,label-exit) 
-        (LABEL ,label-fun)) (compile-lisp (car(cdr (cdr expr))) asm parameter-assoc nb-var) `((POP :R1)(POP :R0) (MOVE :R0 :FP) (PUSH :R1));; on essaye comme ça
+        (LABEL ,label-fun)) (compile-lisp (car(cdr (cdr expr))) asm parameter-assoc nb-var) `((POP :R0)(POP :R1)(POP :R2)(POP :R2) (MOVE :R2 :FP) (PUSH :R0) (JUMP :R1));; on essaye comme ça
          `((LABEL ,label-exit) )  asm)
 
     )    
