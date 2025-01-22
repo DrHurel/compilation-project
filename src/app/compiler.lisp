@@ -26,11 +26,20 @@
                   ((equal (car expr) 'if) (compile-if expr asm env nb-var))
                   ((equal (car expr) 'when) (compile-when expr asm env nb-var))
                   ((equal 'QUOTE (car expr)) (compile-atom expr asm env nb-var))
+                  ((equal 'progn (car expr)) (compile-progn (cdr expr) asm env nb-var))
                   ;;((atom  (car expr)) (append (compile-atom-in-list expr asm env) (compile-atom-in-list (cdr expr) asm env)));;Compilation d'une liste d'élem
                   (t (compile-funcall expr asm env nb-var));;evaluation des fct car sinon echec car soit on ne connait pas la fct doit ce n'est pas une fct
             )
          
          )
+    )
+)
+
+(defun compile-progn (expr asm env nb-var)
+    (print expr)
+    (if (= (length expr) 1)
+        (append (compile-lisp (car expr) asm env nb-var) asm)
+        (append (compile-lisp (car expr) asm env nb-var) (compile-progn (cdr expr) asm env nb-var))
     )
 )
 
@@ -280,7 +289,7 @@
           (label-exit (concatenate 'string "exit-" (write-to-string  (car expr))))
         )
         (append `((JUMP ,label-exit) 
-        (LABEL ,label-fun)) (compile-lisp (car(cdr (cdr expr))) asm parameter-assoc nb-var) `((LABEL ,label-exit)) asm)
+        (LABEL ,label-fun)) (compile-progn (car(cdr (cdr expr))) asm parameter-assoc nb-var) `((LABEL ,label-exit)) asm)
 
     )    
 )
@@ -320,7 +329,7 @@
                 `((PUSH :FP) (MOVE :SP :FP)) ;;Sauvegarde du Framepointeur
                 `((LOAD ,nbparam :R0) (PUSH :R0);;Sauvegarde du nombre d'argument
                 (JSR ,name-fun));;Ici je JUMP à la fonction avec retour
-                `((POP :R1)(POP :R0) (POP :R0) (MOVE :R0 :FP) (PUSH :R1));; on essaye comme ça
+                `((POP :R1)(POP :R0) (MOVE :R0 :FP) (PUSH :R1));; on essaye comme ça
             )
         )
 )
@@ -341,6 +350,7 @@
 
 
 
+;;(print (compile-lisp '(+ 5 6 8) '() '() 0))
 
 ;;(print (compile-lisp '(cond(cond1 expr1)
 ;;                (cond2 expr2)
@@ -349,7 +359,7 @@
 ;;                (t expr5)
 ;;               ) '() '() 0))
 
-;;(print (compile-lisp '(when (= c d) (+ 5 6 8 )) '() '()))
+;;(print (compile-lisp '(when (= c d) (+ 5 6 8 )) '() '() 0))
 
 ;;(print (compile-parameter '(toto titi tata) '() '()))
 
@@ -357,10 +367,10 @@
 ;;    6
 ;;    5)) '() '()))
 
-;;(print (compile-lisp '(defun fct-a-la-con (x y z)
-;;    (if (= x y)
-;;        z
-;;        (+ 1 z))) '() '() 0) )
+(print (compile-lisp '(defun fct-a-la-con (x y z)
+    (if (= x y)
+        z
+        (+ 1 z))) '() '() 0) )
 
 
 ;;(print (compile-lisp '(let ((var1 1)
@@ -369,4 +379,7 @@
 ;;                            (+ var1 var3)) '() '() 0))
 
 
-(print (compile-lisp '(funcall '(0 1 2) param2) '() '() 0))
+;;(print (compile-lisp '(funcall '(0 1 2) param2) '() '() 0))
+
+
+;;(print (compile-lisp '(progn (+ 5 0) (+ 1 9)) '() '() 0))
