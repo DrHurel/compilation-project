@@ -280,7 +280,7 @@
           (label-exit (concatenate 'string "exit-" (write-to-string  (car expr))))
         )
         (append `((JUMP ,label-exit) 
-        (LABEL ,label-fun)) (compile-lisp (car(cdr (cdr expr))) asm parameter-assoc nb-var) `((LABEL ,label-exit)) asm)
+        (LABEL ,label-fun)) (compile-lisp (car(cdr (cdr expr))) asm parameter-assoc nb-var) `((HALT)(LABEL ,label-exit) )  asm)
 
     )    
 )
@@ -370,7 +370,7 @@
 ;;                            (+ var1 var3)) '() '() 0))
 
 
-(print (compile-lisp '(funcall '(0 1 2) param2) '() '() 0))
+(print (compile-lisp '(if (<= n 1)(1)(* n (factorial (- n 1)))) '() '() 0))
 ;;(print (compile-lisp '(funcall param1 param2) '() '() 0))
 
 
