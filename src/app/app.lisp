@@ -64,7 +64,6 @@
     (dolist (single-expr (read-from-string (format nil "(~A)" expr)))
       (let* ((compiled-code (compile-i single-expr)))
         (format t "Loading program...~%")
-        (print compiled-code)
         (vm-load vm compiled-code)
 
         ))

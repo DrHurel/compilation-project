@@ -280,7 +280,7 @@
           (label-exit (concatenate 'string "exit-" (write-to-string  (car expr))))
         )
         (append `((JUMP ,label-exit) 
-        (LABEL ,label-fun)) (compile-lisp (car(cdr (cdr expr))) asm parameter-assoc nb-var) `((HALT)(LABEL ,label-exit) )  asm)
+        (LABEL ,label-fun)) (compile-lisp (car(cdr (cdr expr))) asm parameter-assoc nb-var) `((LABEL ,label-exit) )  asm)
 
     )    
 )
@@ -321,7 +321,7 @@
                 `((PUSH :FP) (MOVE :SP :FP)) ;;Sauvegarde du Framepointeur
                 `((MOVE ,nbparam :R0) (PUSH :R0);;Sauvegarde du nombre d'argument
                 (JSR ,name-fun));;Ici je JUMP à la fonction avec retour
-                `((POP :R1)(POP :R0) (POP :R0) (MOVE :R0 :FP) (PUSH :R1));; on essaye comme ça
+                `((POP :R1)(POP :R0) (MOVE :R0 :FP) (PUSH :R1));; on essaye comme ça
             )
         )
 )

@@ -176,9 +176,11 @@
   (loop while (and (>= (pc-get vm) (vm-variable-get vm +EOC+))
                    (is-running vm)) do
     ;; wait for enter to continue
-    (format t "Press enter to continue~%")
-    (finish-output)
-    (read-line)
+    (when (is-debug vm) 
+      (format t "Press enter to continue~%")
+      (finish-output)
+      (read-line)
+    )
 
     (let ((insn (mem-get vm (pc-get vm))))
       (format t "Executing instruction: ~A~%" insn )
