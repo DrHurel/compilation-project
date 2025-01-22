@@ -126,7 +126,7 @@
              ;; Comparaison d'égalité seulement
              (attr-set vm :FEQ (if (eq val1 val2) 1 0))
              ;;(format t "FEQ set to ~A~%" (attr-get vm :FEQ))
-            
+        )
           (t
              ;; Comparaison numérique
              (attr-set vm :FEQ (if (= val1 val2) 1 0))
@@ -137,8 +137,7 @@
       )
     )
   )
-) )
-
+)
 (defun asm-jgt (vm insn)
   (if (eq (attr-get vm :FGT) 1)
       (asm-jmp vm insn)))
@@ -245,7 +244,7 @@
 (defun asm-pop (vm insn)
   (let ((reg (second insn)))
     (let ((sp (attr-get vm :SP)))
-      (let ((value (mem-get vm sp)))
+      (let ((value (mem-get vm (- sp 1))))
         ;;(format t "POP: Register ~A, Value ~A~%" reg value)
         (attr-set vm reg value)
         (attr-set vm :SP (- sp 1))))))
