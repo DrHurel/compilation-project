@@ -17,8 +17,10 @@
   (setf (aref (attr-get vm :MEM) addr) value))
 
 (defun mem-get (vm addr)
+  (when (is-debug vm) 
+      (format t "Getting memory from address ~A: ~A ~A~%" addr (aref (attr-get vm :MEM) addr) (attr-get vm :MEM))
+    )
   (let ((value (aref (attr-get vm :MEM) addr)))
-    ;;(format t "Getting memory from address ~A: ~A~%" addr value)
     value))
 
 ;; Variable management
@@ -176,6 +178,7 @@
   (loop while (and (>= (pc-get vm) (vm-variable-get vm +EOC+))
                    (is-running vm)) do
     (let ((insn (mem-get vm (pc-get vm))))
+      (when (is-debug vm) (format t "Executing instruction: ~A~%" insn ))
       (case (first insn)
         (LABEL (asm-label vm insn))
         (RET (asm-ret vm insn))
