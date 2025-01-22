@@ -1,12 +1,5 @@
 (require "src/utils/tools.lisp")
 
-(defun asm-jump (vm insn)
-  (let ((label (second insn)))
-    ;;(format t "JUMP: Label ~A~%" label)
-    (let ((target (etiq-get vm label)))
-      (if target
-          (attr-set vm :PC target)
-          (error "Undefined label: ~a" label)))))
 
 (defun asm-add (vm insn)
   (let ((val1 (attr-get vm (second insn)))
@@ -58,8 +51,8 @@
   (let ((label (second insn)))
     ;;(format t "JMP: Label ~A~%" (+ label 1))
     (if (numberp label) 
-        (attr-set vm :PC (+ label 1))
-        (if (fboundp (intern (string-upcase label)))
+      (attr-set vm :PC (+ label 1))
+      (if (fboundp (intern (string-upcase label)))
             (progn
               ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
               (let ((args '()))
@@ -75,20 +68,32 @@
                   (let ((result (apply (intern (string-upcase label)) args)))
                     (attr-set vm :R0 result)))))
             ;; Sinon, signaler une erreur
-            (error "Etiquette non définie: ~a" label)))))
+            (if (eq label ':R1) 
+              (let ((value (attr-get vm :R1)))
+                (format t "JMP: Label ~A~%" value)
+               (attr-set vm :PC value))
+              (error "Etiquette non définie: ~a" label))
+      )
+    )
+  )
+)
 
 (defun asm-jsr (vm insn)
    ;; Extraire l'étiquette de l'instruction
   (let ((label (second insn)))
-    (if (or (numberp label) (is-etiq-set vm label))
-        (progn
-          ;;(format t "JSR: Label ~A~%" label)
+    (if 
+      (
+        or
+          (numberp label) (is-etiq-set vm label)
+      )
+      (progn
           ;; Si l'étiquette est définie, continuer avec l'exécution normale
           (attr-set vm :R1 (- (pc-get vm) 1))
           (asm-push vm '(PUSH :R1))
           (asm-jmp vm insn))
         ;; Gérer le cas où l'étiquette n'est pas définie
-        (if (fboundp (intern (string-upcase label)))
+        (case 
+          (fboundp (intern (string-upcase label)))
             (progn
               ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
               (let ((args '()))
@@ -104,7 +109,13 @@
                   (let ((result (apply (intern (string-upcase label)) args)))
                     (attr-set vm :R0 result)))))
             ;; Sinon, signaler une erreur
-            (error "Etiquette non définie: ~a" label)))))
+        (
+          t (error "Etiquette non définie: ~a" label)
+        )
+      )
+    )
+  )
+)
 
 
 (defun get-label (vm label)
