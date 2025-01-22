@@ -167,14 +167,14 @@
     (let ((v (cond
             ((is-const dst) (second dst))
             ((keywordp dst) (attr-get vm dst)))))
-      (attr-set vm :FNIL (null v)))))
+      (attr-set vm :FEQ (null v)))))
 
 (defun asm-jtrue (vm insn)
-  (if (not (attr-get vm :FNIL))
+  (if (not (attr-get vm :FEQ))
     (asm-jmp vm insn)))
 
 (defun asm-jnil (vm insn)
-  (if (attr-get vm :FNIL)
+  (if (attr-get vm :FEQ)
     (asm-jmp vm insn)))
 
 (defun asm-move (vm insn)
