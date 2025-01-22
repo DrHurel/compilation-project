@@ -31,7 +31,7 @@
     ;;(format t "Getting variable ~A: ~A~%" var value)
     value))
 
-;; Program counter management
+;; Program counter management4
 (defun pc-set (vm value)
   (attr-set vm :PC value))
 
@@ -72,22 +72,25 @@
 (defun update-labels-for-jumps (vm)
   (format t "Updating labels for jumps~%")
   (let ((code-start (vm-variable-get vm +SOC+))
-        (code-end (vm-variable-get vm +EOC+)))  ; Corrected from +EOF+ to +EOC+
+        (code-end (vm-variable-get vm +EOC+)))
     (format t "Code range: ~A to ~A~%" code-end code-start)
     ;; First pass: register all labels
     (loop for addr from code-end to code-start do
       (let ((insn (mem-get vm addr)))
         (when (and (listp insn)
-                  (eq (first insn) 'LABEL))
+                   (eq (first insn) 'LABEL))
           (format t "Registering label: ~A at address ~A~%" (second insn) addr)
           (etiq-set vm (string (second insn)) addr))))
+    
+    ;; Print all registered labels
+    (format t "Registered labels: ~A~%" (attr-get vm +ETIQ+))
     
     ;; Second pass: resolve jump targets
     (loop for addr from code-end to code-start do
       (let ((insn (mem-get vm addr)))
         (when (and (listp insn)
-                  (member (first insn) 
-                         '(JUMP JMP JSR JGT JGE JLT JLE JEQ JNE JTRUE JNIL)))
+                   (member (first insn)
+                           '(JUMP JMP JSR JGT JGE JLT JLE JEQ JNE JTRUE JNIL)))
           ;;(format t "Processing jump instruction at ~A: ~A~%" addr insn)
           (let* ((label (second insn))
                  (target (if (integerp label)
@@ -149,24 +152,30 @@
     vm))
 
 (defun vm-load (vm program)
-  ;;(print "Loading program into VM")
-  (let ((initial-pc (- (or (vm-variable-get vm +EOC+)
-                          (+ (pc-get vm) 1)) 1)))
+  (format t "Loading program into VM ~A ~%" program)
+  (let ((initial-pc (or (- (vm-variable-get vm +EOC+) 1)
+                          (+ (pc-get vm) 1))))
+    (format t "Initial PC: ~A~%" initial-pc)
     (loop for insn in program do
       (if (is-label insn)
-          (etiq-set vm (string (second insn)) initial-pc)
           (progn
+            (format t "Registering label: ~A at address ~A~%" (second insn) initial-pc)
+            (etiq-set vm (string (second insn)) initial-pc))
+          (progn
+            (format t "Loading instruction: ~A at address ~A~%" insn initial-pc)
             (mem-set vm initial-pc insn)
             (setq initial-pc (- initial-pc 1)))))
     (vm-variable-set vm +EOC+ (+ initial-pc 1))
-    (update-labels-for-jumps vm)))
+    (update-labels-for-jumps vm)
+    (format t "Program loaded. EOC: ~A~%" (vm-variable-get vm +EOC+))))
 
 (defun vm-execute (vm)
+  (format t "Executing VM~%")
+  ;; display full code
+  (format t "Code: ~A~%" (subseq (attr-get vm :MEM) (vm-variable-get vm +EOC+) (vm-variable-get vm +SOC+)))
   (loop while (and (>= (pc-get vm) (vm-variable-get vm +EOC+))
                    (is-running vm)) do
-    ;;(print (format nil "Stack: ~A%" (stack-get vm)))
     (let ((insn (mem-get vm (pc-get vm))))
-      (if (is-debug vm) (format t "~A " insn))
       (case (first insn)
         (LABEL (asm-label vm insn))
         (RET (asm-ret vm insn))
@@ -194,7 +203,8 @@
         (JNIL (asm-jnil vm insn))
         (HALT (asm-halt vm insn))
         (NOP (asm-nop vm insn))
-        (t (format t "Unknown instruction: ~A~%" insn)))
+        (t (format t "Unknown instruction: ~A~%" insn )
+        ))
       (pc-decr vm)
       (when (is-debug vm)
         (format t "R0: ~A R1: ~A R2: ~A SP: ~A FP: ~A Stack: ~A~%"

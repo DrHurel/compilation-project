@@ -96,4 +96,4 @@
 
 ;; Only run main when loaded as the primary script
 (when *load-pathname*
-  (main)(exit))
+  (main))
