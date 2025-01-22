@@ -327,7 +327,7 @@
             (append 
                 param ;;ici c'est la compilation des mes arguments
                 `((PUSH :FP) (MOVE :SP :FP)) ;;Sauvegarde du Framepointeur
-                `((LOAD ,nbparam :R0) (PUSH :R0);;Sauvegarde du nombre d'argument
+                `((MOVE ,nbparam :R0) (PUSH :R0);;Sauvegarde du nombre d'argument
                 (JSR ,name-fun));;Ici je JUMP à la fonction avec retour
                 `((POP :R1)(POP :R0) (MOVE :R0 :FP) (PUSH :R1));; on essaye comme ça
             )
@@ -379,7 +379,7 @@
 ;;                            (+ var1 var3)) '() '() 0))
 
 
-;;(print (compile-lisp '(funcall '(0 1 2) param2) '() '() 0))
+(print (compile-lisp '(funcall '(0 1 2) param2) '() '() 0))
 
 
 ;;(print (compile-lisp '(progn (+ 5 0) (+ 1 9)) '() '() 0))
