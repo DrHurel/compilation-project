@@ -57,7 +57,7 @@
 (defun asm-jmp (vm insn)
   (let ((label (second insn)))
     ;;(format t "JMP: Label ~A~%" (+ label 1))
-    (if (numberp label)
+    (if (numberp label) 
         (attr-set vm :PC (+ label 1))
         (if (fboundp (intern (string-upcase label)))
             (progn
@@ -115,16 +115,19 @@
         (reg2 (third insn)))
     (let ((val1 (cond
                   ((is-const reg1) (second reg1))
+                  ((eq reg1 t) reg1)
                   ((keywordp reg1) (attr-get vm reg1))))
           (val2 (cond
                   ((is-const reg2) (second reg2))
+                  ((eq reg2 t) reg2)
                   ((keywordp reg2) (attr-get vm reg2)))))
       ;;(format t "CMP: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
       ;; Gérer les cas où val1 ou val2 sont t ou nil
       (cond
-        ((or (eq val1 't) (eq val1 'nil) (eq val2 't) (eq val2 'nil))
+        ((or (eq val1 t) (eq val1 nil) (eq val2 t) (eq val2 nil))
              ;; Comparaison d'égalité seulement
-             (attr-set vm :FEQ (if (eq val1 val2) 1 0))
+             
+             (attr-set vm :FEQ (eq val1 val2))
              ;;(format t "FEQ set to ~A~%" (attr-get vm :FEQ))
         )
           (t
@@ -170,6 +173,7 @@
       (attr-set vm :FEQ (null v)))))
 
 (defun asm-jtrue (vm insn)
+  (format t "JTRUE: FEQ ~A~%" (attr-get vm :FEQ))
   (if (not (attr-get vm :FEQ))
     (asm-jmp vm insn)))
 
