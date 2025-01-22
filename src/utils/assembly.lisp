@@ -68,10 +68,10 @@
                   (let ((result (apply (intern (string-upcase label)) args)))
                     (attr-set vm :R0 result)))))
             ;; Sinon, signaler une erreur
-            (if (eq label ':R1) 
+            (if (or (eq label ':R1) (eq label ':R0) (eq label ':SP) (eq label ':PC) (eq label ':BP) (eq label ':FP))
               (let ((value (attr-get vm :R1)))
                 (format t "JMP: Label ~A~%" value)
-               (attr-set vm :PC value))
+               (attr-set vm :PC (+ value 1)))
               (error "Etiquette non définie: ~a" label))
       )
     )
