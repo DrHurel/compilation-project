@@ -181,6 +181,7 @@
   (let* ((source (second insn))
          (dest (third insn))
          (value (cond ((numberp source) source)
+                      ((eq source t) source)
                       ((symbolp source) (attr-get vm source))
                       (t (error "Invalid source for MOVE: ~A" source)))))
     ;;(if (is-debug vm)
