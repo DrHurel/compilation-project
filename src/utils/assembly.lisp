@@ -122,6 +122,7 @@
   (etiq-get vm (string label)))
 
 (defun asm-cmp (vm insn)
+  
   (let ((reg1 (second insn))
         (reg2 (third insn)))
     (let ((val1 (cond
@@ -134,6 +135,7 @@
                   ((keywordp reg2) (attr-get vm reg2)))))
       ;;(format t "CMP: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
       ;; Gérer les cas où val1 ou val2 sont t ou nil
+      (format t "CMP: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
       (cond
         ((or (eq val1 t) (eq val1 nil) (eq val2 t) (eq val2 nil))
              ;; Comparaison d'égalité seulement
@@ -143,9 +145,9 @@
         )
           (t
              ;; Comparaison numérique
-             (attr-set vm :FEQ (if (= val1 val2) 1 0))
-             (attr-set vm :FLT (if (< val1 val2) 1 0))
-             (attr-set vm :FGT (if (> val1 val2) 1 0))
+             (attr-set vm :FEQ (= val1 val2))
+             (attr-set vm :FLT (< val1 val2))
+             (attr-set vm :FGT (> val1 val2))
              ;;(format t "FEQ set to ~A, FLT set to ~A, FGT set to ~A~%" (attr-get vm :FEQ) (attr-get vm :FLT) (attr-get vm :FGT)
         )
       )
@@ -153,27 +155,28 @@
   )
 )
 (defun asm-jgt (vm insn)
-  (if (eq (attr-get vm :FGT) 1)
+  (if (attr-get vm :FGT)
       (asm-jmp vm insn)))
 
 (defun asm-jge (vm insn)
-  (if (or (eq (attr-get vm :FGT) 1) (eq (attr-get vm :FEQ) 1))
+  (if (or (attr-get vm :FGT) (attr-get vm :FEQ))
       (asm-jmp vm insn)))
 
 (defun asm-jlt (vm insn)
-  (if (eq (attr-get vm :FLT) 1)
+  (if (attr-get vm :FLT)
       (asm-jmp vm insn)))
 
 (defun asm-jle (vm insn)
-  (if (or (eq (attr-get vm :FLT) 1) (eq (attr-get vm :FEQ) 1))
+  (format t "JLE: FLT ~A~%" (attr-get vm :FLT))
+  (if (or (attr-get vm :FLT) (attr-get vm :FEQ))
       (asm-jmp vm insn)))
 
 (defun asm-jeq (vm insn)
-  (if (eq (attr-get vm :FEQ) 1)
+  (if (attr-get vm :FEQ)
       (asm-jmp vm insn)))
 
 (defun asm-jne (vm insn)
-  (if (eq (attr-get vm :FEQ) 0)
+  (if (not (attr-get vm :FEQ))
       (asm-jmp vm insn)))
 
 (defun asm-test(vm insn)
@@ -184,12 +187,11 @@
       (attr-set vm :FEQ (null v)))))
 
 (defun asm-jtrue (vm insn)
-  (format t "JTRUE: FEQ ~A~%" (attr-get vm :FEQ))
-  (if (not (attr-get vm :FEQ))
+  (if (attr-get vm :FEQ)
     (asm-jmp vm insn)))
 
 (defun asm-jnil (vm insn)
-  (if (attr-get vm :FEQ)
+  (if (not (attr-get vm :FEQ))
     (asm-jmp vm insn)))
 
 (defun asm-move (vm insn)
