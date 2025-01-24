@@ -1,3 +1,5 @@
 
-(factorial 5)
-(defun factorial (n) (if (< n 1) 1 (* n (factorial (- n 1)))))
+(defun factorial (n) (if (< n 2) 1 (* n (factorial (- n 1)))))
+
+
+(factorial 3)

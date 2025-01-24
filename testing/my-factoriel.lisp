@@ -3,4 +3,4 @@
       acc
       (factorielle (- n 1) (* acc n))))
 
-(factorielle 5)
+(factorielle 7)
