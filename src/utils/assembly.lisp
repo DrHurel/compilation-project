@@ -202,7 +202,8 @@
                       ((eq source t) source)
                       ((stringp source ) source)
                       ((symbolp source) (attr-get vm source))
-                      (t (error "Invalid source for MOVE: ~A" source)))))
+                      
+                      (t source))))
     ;;(if (is-debug vm)
         ;;(format t "MOVE: Source ~A, Value ~A, Destination ~A~%" source value dest))
     (attr-set vm dest value)))

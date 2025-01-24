@@ -355,4 +355,4 @@
         )
     )
 
-(compile-i '(+ 5 6))
+(print (compile-i '(+ 5 6)))
