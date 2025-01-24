@@ -258,7 +258,7 @@
             (append (compile-lisp cond asm env nb-var) 
                     `((POP :R0)
                     (CMP t :R0)
-                    (JTRUE ,etiq-true))
+                    (JNIL ,etiq-true))
                     (compile-lisp else asm env nb-var)
                     `((JMP ,etiq-fin)(LABEL ,etiq-true))
                     (compile-lisp then asm env nb-var)
