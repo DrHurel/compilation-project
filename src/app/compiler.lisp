@@ -2,7 +2,6 @@
 (require "src/utils/label.lisp")
 
 (defun compile-i (func)
-    (print func)
     (compile-lisp func '() '() 4)
 )
 
@@ -333,7 +332,7 @@
       (cons (cons (if (symbolp (car expr))
                      (car expr)
                      (intern (string (car expr))))
-                 (- -1 (length expr)))
+                 (* -1(+ 1 (length expr))))
             (compile-parameter (cdr expr) asm env nb-var))))
 
 (defun compile-let (expr asm env nb-var)
