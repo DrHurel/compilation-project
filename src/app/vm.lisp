@@ -183,7 +183,7 @@
     )
 
     (let ((insn (mem-get vm (pc-get vm))))
-      (format t "Executing instruction: ~A~%" insn )
+      (if (is-debug vm) (format t "Executing instruction: ~A~%" insn ))
       (case (first insn)
         (LABEL (asm-label vm insn))
         (RET (asm-ret vm insn))

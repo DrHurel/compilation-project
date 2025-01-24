@@ -70,7 +70,7 @@
             ;; Sinon, signaler une erreur
             (if (or (eq label ':R1) (eq label ':R0) (eq label ':SP) (eq label ':PC) (eq label ':BP) (eq label ':FP))
               (let ((value (attr-get vm :R1)))
-                (format t "JMP: Label ~A~%" value)
+                
                (attr-set vm :PC (+ value 1)))
               (error "Etiquette non définie: ~a" label))
       )
@@ -135,7 +135,6 @@
                   ((keywordp reg2) (attr-get vm reg2)))))
       ;;(format t "CMP: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
       ;; Gérer les cas où val1 ou val2 sont t ou nil
-      (format t "CMP: Register1 ~A, Value1 ~A, Register2 ~A, Value2 ~A~%" reg1 val1 reg2 val2)
       (cond
         ((or (eq val1 t) (eq val1 nil) (eq val2 t) (eq val2 nil))
              ;; Comparaison d'égalité seulement
@@ -167,7 +166,6 @@
       (asm-jmp vm insn)))
 
 (defun asm-jle (vm insn)
-  (format t "JLE: FLT ~A~%" (attr-get vm :FLT))
   (if (or (attr-get vm :FLT) (attr-get vm :FEQ))
       (asm-jmp vm insn)))
 
