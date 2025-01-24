@@ -38,12 +38,12 @@
       x
   )
 )
-;;(print (nToBin '(+ 5 6)))
+;;;;(print (nToBin '(+ 5 6)))
 
-;;(print (ntobin '(+ 5 6(- 5 7 8))))
+;;;;(print (ntobin '(+ 5 6(- 5 7 8))))
 
 ;;Transformation pour les cond. L'entrée est la liste des op 
-;;(print(cond_SAS '(('cond 'expr)
+;;;;(print(cond_SAS '(('cond 'expr)
 ;;                ('cond 'expr)
 ;;                ('cond 'expr)
 ;;                ('cond 'expr)
@@ -57,7 +57,7 @@
   )
 )
 
-;;(print(cond_SAS '(('cond 'expr)
+;;;;(print(cond_SAS '(('cond 'expr)
 ;;                ('cond 'expr)
 ;;                ('cond 'expr)
 ;;                ('cond 'expr)

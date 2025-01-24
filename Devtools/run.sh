@@ -4,4 +4,5 @@
 LISP="clisp"
 
 # Run CLISP and load project files
-$LISP -q -i -i "src/app/vm.lisp"
+$LISP -q -i -i "src/app/app.lisp" "$@"
+ 

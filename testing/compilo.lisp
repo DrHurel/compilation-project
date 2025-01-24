@@ -1,5 +1,3 @@
-(require "src/utils/sourceToSource.lisp")
-(require "src/utils/label.lisp")
 
 (defun compile-i (func)
     (print func)
@@ -8,10 +6,6 @@
 
 
 (defun compile-lisp (expr asm env nb-var)
-;;(print expr)
-;;(print (car expr))
-;;(print (equal 'QUOTE (car expr)))
-;;(print (listp expr))
     (cond ((atom expr) (compile-atom expr asm env nb-var))
           ((listp expr) 
             (cond ((equal (car expr) '+) (compile-add expr asm env nb-var))
@@ -33,8 +27,7 @@
                   ((equal (car expr) 'when) (compile-when expr asm env nb-var))
                   ((equal 'QUOTE (car expr)) (compile-atom expr asm env nb-var))
                   ((equal 'progn (car expr)) (compile-progn (cdr expr) asm env nb-var))
-                  ;;((atom  (car expr)) (append (compile-atom-in-list expr asm env) (compile-atom-in-list (cdr expr) asm env)));;Compilation d'une liste d'élem
-                  (t (compile-funcall expr asm env nb-var));;evaluation des fct car sinon echec car soit on ne connait pas la fct doit ce n'est pas une fct
+                  (t (compile-funcall expr asm env nb-var))
             )
          
          )
@@ -46,7 +39,6 @@
     (if (or(= (length expr) 1)  (not (listp (car expr))))
         (compile-lisp (car expr) asm env nb-var)
         (append (compile-lisp (car expr) asm env nb-var) (compile-progn (cdr expr) asm env nb-var) asm)
-
     )
 )
 
@@ -70,7 +62,6 @@
 )
 
 (defun compile-add (expr asm env nb-var)
-    ;;(print (nToBin expr))
     (let ((expr-s2s (nToBin expr)))
         (let (
             (operand1 (car(cdr expr-s2s)))
@@ -84,7 +75,6 @@
 )
 
 (defun compile-sub (expr asm env nb-var)
-    ;;(print (nToBin expr))
     (let ((expr-s2s (nToBin expr)))
         (let (
             (operand1 (car(cdr expr-s2s)))
@@ -98,7 +88,6 @@
 )
 
 (defun compile-mult (expr asm env nb-var)
-    ;;(print (nToBin expr))
     (let ((expr-s2s (nToBin expr)))
         (let (
             (operand1 (car(cdr expr-s2s)))
@@ -112,7 +101,6 @@
 )
 
 (defun compile-div (expr asm env nb-var)
-    ;;(print (nToBin expr))
     (let ((expr-s2s (nToBin expr)))
         (let (
             (operand1 (car(cdr expr-s2s)))
@@ -282,8 +270,7 @@
                     asm
             )
         ))
-;;(print (compile-lisp '5 '()))
-;;(print (compile-lisp '(+ 8 7 (- 5 (* 5 7 8 (/ 2 5)))) '()))
+
 (defun compile-when (expr asm env nb-var)
     (let ((queue (cdr expr)))
         (compile-lisp (cons 'cond (cons queue nil)) asm env nb-var))
@@ -296,11 +283,8 @@
           (label-exit (concatenate 'string "exit-" (write-to-string  (car expr))))
         )
         (append `((JUMP ,label-exit) 
-
         (LABEL ,label-fun)) (compile-progn  (cons(car(cdr (cdr expr)))nil) asm parameter-assoc nb-var) '((POP :R0) (POP :R1) (POP :R2) (POP :FP) (POP :R2) (PUSH :R0)(JUMP :R1))
-        ;;`((POP :R0)(POP :R1)(POP :R2)(POP :R2)(POP :R2) (MOVE :R2 :FP) (PUSH :R0) (JUMP :R1));; on essaye comme ça
          `((LABEL ,label-exit) )  asm)
-
 
     )    
 )
@@ -315,7 +299,6 @@
             (compile-parameter (cdr expr) asm env nb-var))))
 
 (defun compile-let (expr asm env nb-var)
-;;(print asm)
     (let ((assembly-var (car expr))
           (code (second expr))
          )
@@ -337,20 +320,14 @@
               (name-fun (car expr))
              )
             (append 
-                param ;;ici c'est la compilation des mes arguments
-                `((PUSH :FP) (MOVE :SP :FP)) ;;Sauvegarde du Framepointeur
-                `((MOVE ,nbparam :R0) (PUSH :R0);;Sauvegarde du nombre d'argument
-                (JSR ,name-fun));;Ici je JUMP à la fonction avec retour
+                param 
+                `((PUSH :FP) (MOVE :SP :FP)) 
+                `((MOVE ,nbparam :R0) (PUSH :R0)
+                (JSR ,name-fun))
+                
             )
         )
 )
-;;Pour le funcall la pile ressembe à
-;;|Nombre de param         |
-;;|Ancien FP               |
-;;|Param1                  |
-;;|...                     |
-;;|ParamN                  |
-;;|ICI on est à l'ancier FP|
 
 (defun compile-funcall-parameter (expr asm env nb-var)
     (if (equal expr nil)
@@ -361,47 +338,55 @@
 
 
 
-;;(print (compile-lisp '(+ 5 6 8) '() '() 0))
+(defun lastOfList (mylist)
+  (if (<= (length mylist) 1)
+      (car mylist)
+      (lastOfList (cdr mylist))
+  )
+)
 
-;;(print (compile-lisp '(cond(cond1 expr1)
-;;                (cond2 expr2)
-;;                (cond3 expr3)
-;;                (cond4 expr4)
-;;                (t expr5)
-;;               ) '() '() 0))
+(defun listWithoutLast (mylist)
+  (if (<= (length mylist) 1)
+      nil
+      (cons (car mylist) (listWithoutLast (cdr mylist)))
+  )
+)
 
-;;(print (compile-lisp '(when (= c d) (+ 5 6 8 )) '() '() 0))
+(defun rewrite_calcul (expr symbol)
+  (if (> (length expr) 2)
+      (cons symbol (cons (rewrite_calcul (listWithoutLast expr) symbol) (cons (lastOfList expr) nil)))
+      (cons symbol expr)
+  )
+)
 
-;;(print (compile-parameter '(toto titi tata) '() '()))
-
-;;(print (compile-defun '(fct-a-la-con (x y z) (if (= 5 6)
-;;    6
-;;    5)) '() '()))
-
-(print (compile-lisp '(defun fct-a-la-con (x y z)
-    (if (= x y)
-        z
-        (+ 1 z))) '() '() 0) )
-
-
-;;(print (compile-lisp '(let ((var1 1)
-;;                            (var2 2)
-;;                            (var3 3))
-;;                            (+ var1 var3)) '() '() 0))
+(defun my-mapcar-arith (lst)
+  (if (null lst)
+      nil
+      (cons (if (listp (car lst)) (nToBin (car lst)) (car lst)) (my-mapcar-arith (cdr lst)))))
 
 
+(defun nToBin (x)
+  (if (listp x)
+      (let ((operator (car x))
+            (operands (cdr x)))
+        (if (> (length x) 3)
+            (let ((new-operands (my-mapcar-arith operands)))
+              (nToBin (rewrite_calcul new-operands operator)))
+            x))
+      x
+  )
+)
 
-;;(print (compile-lisp '(if (<= n 1)(1)(* n (factorial (- n 1)))) '() '() 0))
-;;(print (compile-lisp '(funcall param1 param2) '() '() 0))
+(defun cond_SAS (x)
+  (if (= (length x) 1)
+      (cons 'if (car x)) 
+      (cons 'if (append (car x) (cons (cond_sas (cdr x)) nil )))
+  )
+)
 
+(defun incrementerCPT (cpt-label)
+  (incf cpt-label))
 
-;;(defun compile-i (func)
-;;    (print func)
-;;    (compile-lisp func '() '() 0)
-;;)
-
-
-;(print (compile-lisp '(defun factorial (n) (if (< n 1) 1 (* n (factorial (- n 1)))))
-;'() '() 0
-;))
-
+(defun new-label ()
+        (gensym "LABEL-")
+)

@@ -1,8 +1,28 @@
 {
     "cSpell.words": [
+        "aref",
+        "clisp",
+        "decr",
+        "defconstant",
         "defun",
+        "dotimes",
+        "downto",
+        "etiq",
+        "fboundp",
+        "funcall",
+        "gethash",
+        "insn",
+        "JNIL",
+        "JTRUE",
+        "keywordp",
+        "listp",
+        "nbparam",
+        "numberp",
         "progn",
+        "putf",
+        "Sauvegarde",
         "setf",
+        "stringp",
         "tagbody"
     ]
 }

@@ -1,0 +1,122 @@
+;; Loading file src/app/app.lisp ...
+;;  Loading file /home/hurel/repo/M1/compilation/lisp/compilation-project/src/app/compiler.lisp ...
+;;   Loading file src/utils/sourceToSource.lisp ...
+;;   Loaded file src/utils/sourceToSource.lisp
+;;   Loading file src/utils/label.lisp ...
+;;   Loaded file src/utils/label.lisp
+((MOVE N :R0) (PUSH :R0) (MOVE 1 :R0) (PUSH :R0) (POP :R1) (POP :R0) (CMP :R1 :R0) (JLE #:LABEL-2953) (MOVE NIL :R0) (PUSH :R0) (JMP #:LABEL-2952) (LABEL #:LABEL-2953) (MOVE T :R0) (PUSH :R0) (LABEL #:LABEL-2952) (POP :R0) (CMP T :R0)
+ (JTRUE #:LABEL-2951) (MOVE N :R0) (PUSH :R0) (MOVE N :R0) (PUSH :R0) (MOVE 1 :R0) (PUSH :R0) (POP :R1) (POP :R0) (SUB :R0 :R1) (PUSH :R0) (PUSH :FP) (MOVE :SP :FP) (MOVE 1 :R0) (PUSH :R0) (JSR FACTORIAL) (POP :R1) (POP :R0)
+ (MOVE :R0 :FP) (PUSH :R1) (POP :R1) (POP :R0) (MUL :R0 :R1) (PUSH :R0) (JMP #:LABEL-2950) (LABEL #:LABEL-2951) (PUSH :FP) (MOVE :SP :FP) (MOVE 0 :R0) (PUSH :R0) (JSR 1) (POP :R1) (POP :R0) (MOVE :R0 :FP) (PUSH :R1)
+ (LABEL #:LABEL-2950)) 
+;;  Loaded file /home/hurel/repo/M1/compilation/lisp/compilation-project/src/app/compiler.lisp
+;;  Loading file /home/hurel/repo/M1/compilation/lisp/compilation-project/src/app/vm.lisp ...
+;;   Loading file src/utils/assembly.lisp ...
+;;    Loading file src/utils/tools.lisp ...
+;;    Loaded file src/utils/tools.lisp
+;;   Loaded file src/utils/assembly.lisp
+;;   Loading file src/utils/attribute.lisp ...
+;;   Loaded file src/utils/attribute.lisp
+;;  Loaded file /home/hurel/repo/M1/compilation/lisp/compilation-project/src/app/vm.lisp
+Compiling expressions: 
+(defun factorial (n)(if (<= n 1)(1)(* n (factorial (- n 1)))))
+
+(factorial 5)
+
+(DEFUN FACTORIAL (N) (IF (<= N 1) (1) (* N (FACTORIAL (- N 1))))) Loading program...
+Loading program into VM 
+((JUMP exit-FACTORIAL) (LABEL FACTORIAL) (LOAD (FP -2) R0) (PUSH R0) (MOVE 1 R0) (PUSH R0) (POP R1) (POP R0) (CMP R1 R0) (JLE LABEL-3045) (MOVE NIL R0) (PUSH R0) (JMP LABEL-3044) (LABEL LABEL-3045) (MOVE T R0) (PUSH R0)
+ (LABEL LABEL-3044) (POP R0) (CMP T R0) (JTRUE LABEL-3043) (LOAD (FP -2) R0) (PUSH R0) (LOAD (FP -2) R0) (PUSH R0) (MOVE 1 R0) (PUSH R0) (POP R1) (POP R0) (SUB R0 R1) (PUSH R0) (PUSH FP) (MOVE SP FP) (MOVE 1 R0) (PUSH R0)
+ (JSR FACTORIAL) (POP R1) (POP R0) (MOVE R0 FP) (PUSH R1) (POP R1) (POP R0) (MUL R0 R1) (PUSH R0) (JMP LABEL-3042) (LABEL LABEL-3043) (PUSH FP) (MOVE SP FP) (MOVE 0 R0) (PUSH R0) (JSR 1) (POP R1) (POP R0) (MOVE R0 FP) (PUSH R1)
+ (LABEL LABEL-3042) (HALT) (LABEL exit-FACTORIAL)) 
+Initial PC: 998
+Loading instruction: (JUMP exit-FACTORIAL) at address 998
+Registering label: FACTORIAL at address 997
+Loading instruction: (LOAD (FP -2) R0) at address 997
+Loading instruction: (PUSH R0) at address 996
+Loading instruction: (MOVE 1 R0) at address 995
+Loading instruction: (PUSH R0) at address 994
+Loading instruction: (POP R1) at address 993
+Loading instruction: (POP R0) at address 992
+Loading instruction: (CMP R1 R0) at address 991
+Loading instruction: (JLE LABEL-3045) at address 990
+Loading instruction: (MOVE NIL R0) at address 989
+Loading instruction: (PUSH R0) at address 988
+Loading instruction: (JMP LABEL-3044) at address 987
+Registering label: LABEL-3045 at address 986
+Loading instruction: (MOVE T R0) at address 986
+Loading instruction: (PUSH R0) at address 985
+Registering label: LABEL-3044 at address 984
+Loading instruction: (POP R0) at address 984
+Loading instruction: (CMP T R0) at address 983
+Loading instruction: (JTRUE LABEL-3043) at address 982
+Loading instruction: (LOAD (FP -2) R0) at address 981
+Loading instruction: (PUSH R0) at address 980
+Loading instruction: (LOAD (FP -2) R0) at address 979
+Loading instruction: (PUSH R0) at address 978
+Loading instruction: (MOVE 1 R0) at address 977
+Loading instruction: (PUSH R0) at address 976
+Loading instruction: (POP R1) at address 975
+Loading instruction: (POP R0) at address 974
+Loading instruction: (SUB R0 R1) at address 973
+Loading instruction: (PUSH R0) at address 972
+Loading instruction: (PUSH FP) at address 971
+Loading instruction: (MOVE SP FP) at address 970
+Loading instruction: (MOVE 1 R0) at address 969
+Loading instruction: (PUSH R0) at address 968
+Loading instruction: (JSR FACTORIAL) at address 967
+Loading instruction: (POP R1) at address 966
+Loading instruction: (POP R0) at address 965
+Loading instruction: (MOVE R0 FP) at address 964
+Loading instruction: (PUSH R1) at address 963
+Loading instruction: (POP R1) at address 962
+Loading instruction: (POP R0) at address 961
+Loading instruction: (MUL R0 R1) at address 960
+Loading instruction: (PUSH R0) at address 959
+Loading instruction: (JMP LABEL-3042) at address 958
+Registering label: LABEL-3043 at address 957
+Loading instruction: (PUSH FP) at address 957
+Loading instruction: (MOVE SP FP) at address 956
+Loading instruction: (MOVE 0 R0) at address 955
+Loading instruction: (PUSH R0) at address 954
+Loading instruction: (JSR 1) at address 953
+Loading instruction: (POP R1) at address 952
+Loading instruction: (POP R0) at address 951
+Loading instruction: (MOVE R0 FP) at address 950
+Loading instruction: (PUSH R1) at address 949
+Registering label: LABEL-3042 at address 948
+Loading instruction: (HALT) at address 948
+Registering label: exit-FACTORIAL at address 947
+Updating labels for jumps
+Code range: 948 to 999
+Registered labels: #S(HASH-TABLE TEST FASTHASH-EQUAL (exit-FACTORIAL . 947) (LABEL-3042 . 948) (LABEL-3043 . 957) (LABEL-3044 . 984) (LABEL-3045 . 986) (FACTORIAL . 997))
+Program loaded. EOC: 948
+
+(FACTORIAL 5) Loading program...
+Loading program into VM ((MOVE 5 R0) (PUSH R0) (PUSH FP) (MOVE SP FP) (MOVE 1 R0) (PUSH R0) (JSR FACTORIAL) (POP R1) (POP R0) (MOVE R0 FP) (PUSH R1)) 
+Initial PC: 947
+Loading instruction: (MOVE 5 R0) at address 947
+Loading instruction: (PUSH R0) at address 946
+Loading instruction: (PUSH FP) at address 945
+Loading instruction: (MOVE SP FP) at address 944
+Loading instruction: (MOVE 1 R0) at address 943
+Loading instruction: (PUSH R0) at address 942
+Loading instruction: (JSR FACTORIAL) at address 941
+Loading instruction: (POP R1) at address 940
+Loading instruction: (POP R0) at address 939
+Loading instruction: (MOVE R0 FP) at address 938
+Loading instruction: (PUSH R1) at address 937
+Updating labels for jumps
+Code range: 937 to 999
+Registered labels: #S(HASH-TABLE TEST FASTHASH-EQUAL (exit-FACTORIAL . 947) (LABEL-3042 . 948) (LABEL-3043 . 957) (LABEL-3044 . 984) (LABEL-3045 . 986) (FACTORIAL . 997))
+Program loaded. EOC: 937
+Executing...
+Executing VM
+Code: 
+#((PUSH R1) (MOVE R0 FP) (POP R0) (POP R1) (JSR 997) (PUSH R0) (MOVE 1 R0) (MOVE SP FP) (PUSH FP) (PUSH R0) (MOVE 5 R0) (HALT) (PUSH R1) (MOVE R0 FP) (POP R0) (POP R1) (JSR 1) (PUSH R0) (MOVE 0 R0) (MOVE SP FP) (PUSH FP) (JMP 948)
+  (PUSH R0) (MUL R0 R1) (POP R0) (POP R1) (PUSH R1) (MOVE R0 FP) (POP R0) (POP R1) (JSR 997) (PUSH R0) (MOVE 1 R0) (MOVE SP FP) (PUSH FP) (PUSH R0) (SUB R0 R1) (POP R0) (POP R1) (PUSH R0) (MOVE 1 R0) (PUSH R0) (LOAD (FP -2) R0)
+  (PUSH R0) (LOAD (FP -2) R0) (JTRUE 957) (CMP T R0) (POP R0) (PUSH R0) (MOVE T R0) (JMP 984) (PUSH R0) (MOVE NIL R0) (JLE 986) (CMP R1 R0) (POP R0) (POP R1) (PUSH R0) (MOVE 1 R0) (PUSH R0) (LOAD (FP -2) R0) (JUMP 947))
+Press enter to continue
+Executing instruction: NIL
+Unknown instruction: NIL
+R0: 0 R1: 0 R2: 0 SP: 30 FP: 30 Stack: NIL
+Press enter to continue
