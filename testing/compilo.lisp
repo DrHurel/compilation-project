@@ -35,7 +35,7 @@
                   ((equal (car expr) 'cond) (compile-if (cond_SAS (cdr expr)) asm env nb-var))
                   ((equal (car expr) 'if) (compile-if expr asm env nb-var))
                   ((equal (car expr) 'when) (compile-when expr asm env nb-var))
-                  ((equal 'QUOTE (car expr)) (compile-atom expr asm env nb-var))
+                  ((equal 'QUOTE (car expr)) (compile-atom (first(cdr expr)) asm env nb-var))
                   ((equal 'UNQUOTE (car expr)) (compile-backquote (cdr expr) asm env nb-var))
                   ((equal 'progn (car expr)) (compile-progn (cdr expr) asm env nb-var))
                   ((symbolp (car expr)) (compile-funcall expr asm env nb-var))
@@ -355,4 +355,4 @@
         )
     )
 
-(compile-i (+ 5 6))
+(compile-i '(+ 5 6))
