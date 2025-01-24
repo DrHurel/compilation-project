@@ -46,6 +46,7 @@
     (if (or(= (length expr) 1)  (not (listp (car expr))))
         (compile-lisp (car expr) asm env nb-var)
         (append (compile-lisp (car expr) asm env nb-var) (compile-progn (cdr expr) asm env nb-var) asm)
+
     )
 )
 
@@ -295,9 +296,11 @@
           (label-exit (concatenate 'string "exit-" (write-to-string  (car expr))))
         )
         (append `((JUMP ,label-exit) 
+
         (LABEL ,label-fun)) (compile-progn  (cons(car(cdr (cdr expr)))nil) asm parameter-assoc nb-var) '((POP :R0) (POP :R1) (POP :R2) (POP :FP) (POP :R2) (PUSH :R0)(JUMP :R1))
         ;;`((POP :R0)(POP :R1)(POP :R2)(POP :R2)(POP :R2) (MOVE :R2 :FP) (PUSH :R0) (JUMP :R1));; on essaye comme ça
          `((LABEL ,label-exit) )  asm)
+
 
     )    
 )
@@ -338,7 +341,6 @@
                 `((PUSH :FP) (MOVE :SP :FP)) ;;Sauvegarde du Framepointeur
                 `((MOVE ,nbparam :R0) (PUSH :R0);;Sauvegarde du nombre d'argument
                 (JSR ,name-fun));;Ici je JUMP à la fonction avec retour
-                
             )
         )
 )
@@ -359,6 +361,7 @@
 
 
 
+;;(print (compile-lisp '(+ 5 6 8) '() '() 0))
 
 ;;(print (compile-lisp '(cond(cond1 expr1)
 ;;                (cond2 expr2)
@@ -367,7 +370,7 @@
 ;;                (t expr5)
 ;;               ) '() '() 0))
 
-;;(print (compile-lisp '(when (= c d) (+ 5 6 8 )) '() '()))
+;;(print (compile-lisp '(when (= c d) (+ 5 6 8 )) '() '() 0))
 
 ;;(print (compile-parameter '(toto titi tata) '() '()))
 
@@ -375,16 +378,17 @@
 ;;    6
 ;;    5)) '() '()))
 
-;;(print (compile-lisp '(defun fct-a-la-con (x y z)
-;;    (if (= x y)
-;;        z
-;;        (+ 1 z))) '() '() 0) )
+(print (compile-lisp '(defun fct-a-la-con (x y z)
+    (if (= x y)
+        z
+        (+ 1 z))) '() '() 0) )
 
 
 ;;(print (compile-lisp '(let ((var1 1)
 ;;                            (var2 2)
 ;;                            (var3 3))
 ;;                            (+ var1 var3)) '() '() 0))
+
 
 
 ;;(print (compile-lisp '(if (<= n 1)(1)(* n (factorial (- n 1)))) '() '() 0))
@@ -400,3 +404,4 @@
 ;(print (compile-lisp '(defun factorial (n) (if (< n 1) 1 (* n (factorial (- n 1)))))
 ;'() '() 0
 ;))
+
