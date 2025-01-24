@@ -142,7 +142,7 @@
     (attr-set vm +EOC+ (- size 1))
     (attr-set vm +EOF+ (- size 1))
     ;; Set initial PC and running state
-    (attr-set vm :PC (- size 1))
+    (attr-set vm :PC (- size 2))
     (attr-set vm :RUNNING 1)
     vm))
 
@@ -172,7 +172,8 @@
 (defun vm-execute (vm)
   (format t "Executing VM~%")
   ;; display full code
-  (format t "Code: ~A~%" (subseq (attr-get vm :MEM) (vm-variable-get vm +EOC+) (vm-variable-get vm +SOC+)))
+  
+  (when (is-debug vm) (format t "Code: ~A~%" (subseq (attr-get vm :MEM) (vm-variable-get vm +EOC+) (vm-variable-get vm +SOC+))))
   (loop while (and (>= (pc-get vm) (vm-variable-get vm +EOC+))
                    (is-running vm)) do
     ;; wait for enter to continue

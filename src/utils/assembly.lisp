@@ -92,26 +92,29 @@
           (asm-push vm '(PUSH :R1))
           (asm-jmp vm insn))
         ;; Gérer le cas où l'étiquette n'est pas définie
-        (case 
+      (if 
           (fboundp (intern (string-upcase label)))
-            (progn
+          
+          (progn
               ;; Si label est une fonction Lisp, récupérer les arguments et appeler la fonction
+              
               (let ((args '()))
                 ;; Récupérer le nombre d'arguments du stack
-                (let ((arg-count (mem-get vm (attr-get vm :SP))))
-                  ;; Récupérer les arguments du stack
+                (let ((arg-count (mem-get vm (-(attr-get vm :SP) 1))))
+                  ; ; Récupérer les arguments du stack
                     (dotimes (i arg-count)
-                    (let ((arg-value (mem-get vm (- (attr-get vm :SP) (+ i 1)))))
+                    (let ((arg-value (mem-get vm (- (attr-get vm :SP) (+ i 3)))))
                       (if (is-debug vm)
                           (format t "Arg: ~A~%" arg-value))
                       (push arg-value args)))
                   ;; Appeler la fonction Lisp avec les arguments et stocker le résultat dans R0
                   (let ((result (apply (intern (string-upcase label)) args)))
-                    (attr-set vm :R0 result)))))
+                    (attr-set vm :R0 result))))
+            )
             ;; Sinon, signaler une erreur
-        (
-          t (error "Etiquette non définie: ~a" label)
-        )
+        
+        (error "Etiquette non définie: ~a" label)
+        
       )
     )
   )
@@ -197,6 +200,7 @@
          (dest (third insn))
          (value (cond ((numberp source) source)
                       ((eq source t) source)
+                      ((stringp source ) source)
                       ((symbolp source) (attr-get vm source))
                       (t (error "Invalid source for MOVE: ~A" source)))))
     ;;(if (is-debug vm)

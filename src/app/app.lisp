@@ -19,6 +19,7 @@
   (format t "  load <file>             Load and run a Lisp source file~%")
   (format t "Options:~%")
   (format t "  --debug                 Enable debug output~%")
+  (format t "  --exit                 Enable exit on program completed~%")
   (format t "  --size <number>         Set VM memory size (default: 1000)~%")
   (format t "Example:~%")
   (format t "  lisp --load vm-cli.lisp -- --debug run \"(+ 2 3)\"~%"))
@@ -31,6 +32,8 @@
     (loop while args do
       (let ((arg (pop args)))
         (cond
+          ((string= arg "--exit")
+           (push '(:exit . t) options))
           ((string= arg "--debug")
            (push '(:debug . t) options))
           ((string= arg "--size")
@@ -54,11 +57,12 @@
 (defun run-vm (expr options)
   (let* ((vm-size (or (cdr (assoc :size options)) 1000))
          (debug-mode (cdr (assoc :debug options)))
+         (exit-mode (cdr (assoc :exit options)))
          (vm (make-vm vm-size)))
 
     (when debug-mode
       (attr-set vm :DEBUG t))
-
+    
     (format t "Compiling expressions: ~A~%" expr)
     
     (dolist (single-expr (read-from-string (format nil "(~A)" expr)))
@@ -68,9 +72,16 @@
 
         ))
     (format t "Executing...~%")
+        (format t "Start time: ~A~%" (get-universal-time ))
         (vm-execute vm)
+        (format t "End time: ~A~%" (get-universal-time))
     (let ((result (attr-get vm :R0)))
-      (format t "Result: ~A~%" result))))
+      (format t "Result: ~A~%" result))
+    (when exit-mode
+      (exit)
+    ))
+
+)
 
 (defun main ()
   (let ((args (get-command-line-args)))
