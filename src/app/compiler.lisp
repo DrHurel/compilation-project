@@ -1,6 +1,12 @@
 (require "src/utils/sourceToSource.lisp")
 (require "src/utils/label.lisp")
 
+(defun compile-i (func)
+    (print func)
+    (compile-lisp func '() '() 0)
+)
+
+
 (defun compile-lisp (expr asm env nb-var)
 ;;(print expr)
 ;;(print (car expr))
@@ -26,11 +32,20 @@
                   ((equal (car expr) 'if) (compile-if expr asm env nb-var))
                   ((equal (car expr) 'when) (compile-when expr asm env nb-var))
                   ((equal 'QUOTE (car expr)) (compile-atom expr asm env nb-var))
+                  ((equal 'progn (car expr)) (compile-progn (cdr expr) asm env nb-var))
                   ;;((atom  (car expr)) (append (compile-atom-in-list expr asm env) (compile-atom-in-list (cdr expr) asm env)));;Compilation d'une liste d'élem
                   (t (compile-funcall expr asm env nb-var));;evaluation des fct car sinon echec car soit on ne connait pas la fct doit ce n'est pas une fct
             )
          
          )
+    )
+)
+
+(defun compile-progn (expr asm env nb-var)
+(print expr)
+    (if (or(= (length expr) 1)  (not (listp (car expr))))
+        (compile-lisp (car expr) asm env nb-var)
+        (append (compile-lisp (car expr) asm env nb-var) (compile-progn (cdr expr) asm env nb-var) asm)
     )
 )
 
@@ -280,7 +295,7 @@
           (label-exit (concatenate 'string "exit-" (write-to-string  (car expr))))
         )
         (append `((JUMP ,label-exit) 
-        (LABEL ,label-fun)) (compile-lisp (car(cdr (cdr expr))) asm parameter-assoc nb-var) '((POP :R0) (POP :R1) (POP :R2) (POP :FP) (POP :R2) (PUSH :R0)(JUMP :R1))
+        (LABEL ,label-fun)) (compile-progn  (cons(car(cdr (cdr expr)))nil) asm parameter-assoc nb-var) '((POP :R0) (POP :R1) (POP :R2) (POP :FP) (POP :R2) (PUSH :R0)(JUMP :R1))
         ;;`((POP :R0)(POP :R1)(POP :R2)(POP :R2)(POP :R2) (MOVE :R2 :FP) (PUSH :R0) (JUMP :R1));; on essaye comme ça
          `((LABEL ,label-exit) )  asm)
 
@@ -372,11 +387,16 @@
 ;;                            (+ var1 var3)) '() '() 0))
 
 
-(print (compile-lisp '(if (<= n 1)(1)(* n (factorial (- n 1)))) '() '() 0))
+;;(print (compile-lisp '(if (<= n 1)(1)(* n (factorial (- n 1)))) '() '() 0))
 ;;(print (compile-lisp '(funcall param1 param2) '() '() 0))
 
 
-(defun compile-i (func)
-    (print func)
-    (compile-lisp func '() '() 0)
-)
+;;(defun compile-i (func)
+;;    (print func)
+;;    (compile-lisp func '() '() 0)
+;;)
+
+
+;(print (compile-lisp '(defun factorial (n) (if (< n 1) 1 (* n (factorial (- n 1)))))
+;'() '() 0
+;))
